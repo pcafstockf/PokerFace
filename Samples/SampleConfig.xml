@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration 
+	xmlns="http://www.bytelightning.com/opensource.pokerface/xsd/v1"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.bytelightning.com/opensource.pokerface/xsd/v1 /PokerFace_v1Config.xsd"
+>
+	<!--  
+		There must be one an only one 'server' element.
+		It may contain the following attributes:
+		'cpu':			< 0: Use actual number of physical cpu cores in the machine.
+		 				>=  1:  The number (up to twice the number of physical cpu cores).
+		 				>- 0 && < 1: The number multiplied by the number of physical cpu cores 
+		 				(optional, defaults to 0.66)
+		'soTimeout':	Enable/disable SO_TIMEOUT (in milliseconds).  The timeout must be > 0. A timeout of zero is interpreted as an infinite timeout. (optional, defaults to 0)
+	-->
+	<server cpu="0.66" soTimeout="0" >
+		<!-- 
+			Multiple listen elements may be specified. If none are specified, PokerFace default to an http listener on 127.0.0.1:8080
+			The listen element may contain the following attriutes:
+	 			'address':	Interface on which to listen for incoming connections (optional, defaults to 0.0.0.0) 
+				'port':		Port on which to listen for incoming connections (optional, defaults to 80 for insecure and 443 for secure) 
+				NOTE: If any of the below encryption options are specified, a 'keystore' element MUST be specified below 
+				'secure':	Should encryption be enabled for this port (optional, defaults to false) 
+				'protocol':	Type of encryption to use for this port.  If specified, 'secure' is automatically set to 'true'. (optional, defaults to no encryption) 
+				'alias':	Alias of keystore certificate representing this server.  If specified, 'secure' is automatically set to 'true'. (optional, if not specified, default java certificate selection will be used) 
+				'trustAny':	Trust any certificate a client/browser might present. If false, the client must present a certificate that can be validated by our keystore (below). (optional, defaults to true)
+		 -->
+		<listen address="0.0.0.0" port="8088"  secure="true" protocol="TLS" alias="www.mydomain.com" trustAny="true" />
+		
+		<!-- 
+			Defaults to the current version of PokerFace.  
+			This will be sent back in the HTTP 'Via' header.  
+			If you must override it, please give PokerFace some credit :-) as this is how we track it's popularity, and in turn attract folks to help enhance and develop it.
+		<serverAgent>PokerFace/X.SNAPSHOT</serverAgent>
+		 -->
+	</server>
+	
+	<!-- 
+		File path to the certificate keystore.  (optional) 
+		The keystore must be of the type specified by the system property 'keystore.type' which defaults to 'jks'
+		NOTE: If any of the listen elements above specify an encrypted connection, a keystore (and keypass) must be specified.
+	-->
+	<keystore>src/test/resources/PokerFaceTestKeystore.jks</keystore>
+	<!-- 
+		The password used to check the integrity of or unlock (e.g. the keystore resides on a hardware token device), the keystore. (optional, defaults to null a.k.a. none) 
+	-->
+	<storepass>null</storepass>
+	<!--  
+		The password for recovering keys in the KeyStore (required only if a keystore is specified, but may be an empty string) 
+	-->
+	<keypass>changeit</keypass>
+	
+	<!-- 
+		'targets' supports the same xml attributes as 'server' above, plus:
+			'connectTimeout':	Amount of time (in milliseconds) that the connection will block until established or an error occurs. A timeout of zero is interpreted as an infinite timeout. (optional, defaults to 0) 
+			'bufferSize':		Buffer size (in KiloBytes) to be used for proxying each connection between the client and a remote target (optional, defaults to 1024K) 
+			'trustAny':			Ignore any certificate errors presented by any of the below configured targets (optional, defaults to false) 
+			'protocol':			Encryption protocol that PokerFace should request when communicating with the below configured targets (optional, defaults to "TLS") 
+			'connMaxTotal':		Maximum number of total connections to remote targets at any given time.  
+									 NOTE:  Because PokerFace uses Async NIO, this can be a very high number, BUT should be just less than the number of open sockets supported by your system.
+									 (optional, defaults to 1023)
+			'connMaxPerRoute':	Maximum number of connections to any one remote target at a time.  
+									 NOTE:  Because PokerFace uses Async NIO, this can be a very high number, BUT should be just less than the number of open sockets supported by your system.
+									 (optional, defaults to 1023)
+	-->
+	<targets connectTimeout="0" bufferSize="1024" trustAny="false" protocol="TLS" connMaxTotal="1023" connMaxPerRoute="1023" >
+		<!-- 
+			Multiple target elements may be specified.  You could have zero elements however if your scripts were handling all requests. 
+			It is perfectly fine to have multiple target's pointing at the same host, but with different 'pattern's.
+			NOTE: The ordering of 'target' elements is honored, so you should list more specific target's first.
+			ALSO: PLEASE see the Quick Start Guide for a discussion about the 'DocumentRoot' problem that all http proxies face.
+			Uri/Url request patterns received from the client/browser which match this expression will be forwarded to this target (unless overridden by a script).
+				'pattern':	Patterns may begin or end with a wildcard '*', but will be ignored elsewhere.
+								Incoming requests that do not match any of the target patterns will cause PokerFace to return a 404 (NOT_FOUND).
+								(required).
+				'url':		Url of the that should be prepended to the request received from the client/browser before issuing a request to this target.
+								(required).
+								NOTE: The '#' anchor itself is optional but if present indicates how many characters should be stripped from the front of the client/browser request before adding it to this 'url' (Please see the Quick Start Guide for further explanation).
+		-->
+		<target pattern="/*" url="https://new-hotness.mydomain.com:80/#0" />
+		<!-- 
+			Defaults to the current version of PokerFace.  
+			This will be used for all requests to the configured remote targets above.  
+			If you must override it, please give PokerFace some credit :-) as this is how we track it's popularity, and in turn attract folks to help enhance and develop it.
+		<userAgent>PokerFace/X.SNAPSHOT</userAgent>
+		 -->
+	</targets>
+	
+	<!-- 
+		Configure Nashorn based scripts (optional element)
+		Please see the Scripting PokerFace Guide for for more details
+	-->
+	<scripts>
+		<!-- 
+			File path to a root directory containing the scripts. (required) 
+		-->
+		<rootDirectory>Samples/ScriptRoot</rootDirectory>
+		<!-- 
+			If true PokerFace will watch the 'rootDirectory' for script changes and dynamically load, modify, delete script endpoints as the file system changes. (optional, defaults to false) 
+		-->
+		<dynamicWatch>false</dynamicWatch>
+		<!-- 
+			If true, PokerFace will allow scripts to dynamically specify remote targets *not* in the configured list above.  Use this option wisely! (optional, defaults to false) 
+		-->
+		<dynamicTargetScripting>false</dynamicTargetScripting>
+		<!--
+			Path to a Javascript library that will be preloaded into the Nashorn script engine (optional, multiple library elements may be specified).  
+			WARNING:
+				You will still need to respect the mutability/immutability constraints of the endpoint methods.  
+				In other words, the library may NOT modify its own internal state when called from an immutable endpoint method.
+		-->
+		<library>ScriptLibraries/requirejs-min.js</library>
+		<!-- 
+			The 'scriptConfig' element (if present) will be passed to the 'setup' method of every JavaScript endpoint in the root script directory.
+			The content of this element may be any well formed xml.
+		-->
+		<scriptConfig>
+			<!-- Just a sample of some content -->
+			<file>/Site/script-files</file>
+			<jndi>ldap://localhost:389/cn=homedir,cn=Jon%20Ruiz,ou=People,o=jnditutorial</jndi>
+		</scriptConfig>
+	</scripts>
+</configuration>

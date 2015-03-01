@@ -1,0 +1,3 @@
+http://127.0.0.1:8080/pokerface.html
+http://127.0.0.1:8080/pokerface.jpg
+http://127.0.0.1:8080/jquery.js
