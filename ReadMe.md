@@ -9,9 +9,11 @@ This means it can be used for sophisticated A/B testing, dynamic load balancing,
 Besides its **scriptability**, PokerFace is small (e.g. easy to audit), extremely fast, and portable.  
 It is built on the popular Apache HttpCore NIO libraries to provide top performance, scalability, and standards compliance.
 
+You can [download](https://github.com/pcafstockf/PokerFace/blob/master/dist/PokerFace-0.9.0-dist.jar) the latest self contained executable jar from the dist directory.
+
 To get started, please see the [Quick Start Guide](http://pcafstockf.github.io/PokerFace/quickstart.html).
 
-Unofficial [benchmarks](http://pcafstockf.github.io/PokerFace/benchmarks.html).
+For the curious, here are some unofficial [benchmarks](http://pcafstockf.github.io/PokerFace/benchmarks.html).
 
 Clarity and simplicity are key principles of PokerFace, so suggestions for improving the documentation are eagerly solicited.
 
