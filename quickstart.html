@@ -7,7 +7,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="Date-Revision-yyyymmdd" content="20150302" />
+    <meta name="Date-Revision-yyyymmdd" content="20150303" />
     <meta http-equiv="Content-Language" content="en" />
     <title>PokerFace &#x2013; </title>
     <link rel="stylesheet" href="./css/apache-maven-fluido-1.3.1.min.css" />
@@ -27,9 +27,9 @@
         <div class="container-fluid">
           <div id="banner">
         <div class="pull-left">
-                                <div id="bannerLeft">
+                                    <a href="http://pcafstockf.github.io/PokerFace/index.html" id="bannerLeft">
                 <h2>PokerFace <(◕___◕)></h2>
-                </div>
+                </a>
                       </div>
         <div class="pull-right">  </div>
         <div class="clear"><hr/></div>
@@ -61,6 +61,13 @@
         Introduction</a>
             </li>
                 
+      <li>
+  
+                          <a href="../PokerFace/raw/master/dist/PokerFace-0.9.0-dist.jar" title="Download">
+          <i class="none"></i>
+        Download</a>
+            </li>
+                
       <li class="active">
   
             <a href="#"><i class="none"></i>Quick Start</a>
@@ -71,6 +78,13 @@
                           <a href="scripting.html" title="Scripting">
           <i class="none"></i>
         Scripting</a>
+            </li>
+                
+      <li>
+  
+                          <a href="../PokerFace" title="Source Code">
+          <i class="none"></i>
+        Source Code</a>
             </li>
                 
       <li>
@@ -145,7 +159,7 @@
 <p>Assuming PokerFace is running on a machine named <tt>www.mydomain.com</tt>, lets walk through the <i>DocumentRoot</i> challenge.</p>
 <div class="section">
 <h4><a name="new-hotness"></a>new-hotness</h4>
-<p>When PokerFace recieves a request for <tt>https://www.mydomain.com/public/foo/bar.html</tt>, it will make a proxy request to <tt>https://new-hotness.mydomain.com/public/foo/bar.html</tt>.<br />However, <b>if</b> bar.html contains an absolute link to /assets/my.css, then the browser will request <a class="externalLink" href="https://www.mydomain.com/assets/my.css">https://www.mydomain.com/assets/my.css</a>, and then PokerFace will return a 404 response (since that does not start with either /public/* or /private/*).</p>
+<p>When PokerFace recieves a request for <tt>https://www.mydomain.com/public/foo/bar.html</tt>, it will make a proxy request to <tt>https://new-hotness.mydomain.com/public/foo/bar.html</tt>.<br />However, <b>if</b> bar.html contains an absolute link to /assets/my.css, then the browser will request <tt>https://www.mydomain.com/assets/my.css</tt>, and PokerFace will return a 404 response (since that does not start with either /public/* or /private/*).</p>
 <p>Remember, this DocumentRoot challenge is faced by all reverse proxies. Fortunately, there are work-arounds to solve this problem:</p>
 
 <ul>
@@ -195,9 +209,9 @@
   
 <li><tt>-trustany</tt>: Tells PokerFace to ignore any certificate errors that the target servers might generate (e.g. invalid hostname, etc.).</li>
   
-<li><tt>-config</tt>: allows you to specify complex configurations for PokerFace using XML. For instance, you could specify everything except the certificate key password in an XML file and then pass the password on the command line. Documentation and comments should be as close as possible to their subject, so please see the heavily commented <a href="Samples/SampleConfig.xml">sample configuration file</a> which discusses all configurable options for PokerFace.</li>
+<li><tt>-config</tt>: allows you to specify complex configurations for PokerFace using XML. For instance, you could specify everything except the certificate key password in an XML file and then pass the password on the command line. Documentation and comments should be as close as possible to their subject, so please see the heavily commented <a class="externalLink" href="https://raw.githubusercontent.com/pcafstockf/PokerFace/master/Samples/SampleConfig.xml">sample configuration file</a> which discusses all configurable options for PokerFace.</li>
   
-<li><tt>-scripts</tt>, <tt>-watch</tt>, and <tt>-dynamicTargetScripting</tt> options are discussed in <a href="ScriptingPokerFace.html">Scripting PokerFace</a>.</li>
+<li><tt>-scripts</tt>, <tt>-watch</tt>, and <tt>-dynamicTargetScripting</tt> options are discussed in <a class="externalLink" href="http://pcafstockf.github.io/PokerFace/scripting.html">Scripting PokerFace</a>.</li>
 </ul></div></div>
                   </div>
             </div>

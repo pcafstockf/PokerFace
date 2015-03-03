@@ -7,7 +7,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="Date-Revision-yyyymmdd" content="20150302" />
+    <meta name="Date-Revision-yyyymmdd" content="20150303" />
     <meta http-equiv="Content-Language" content="en" />
     <title>PokerFace &#x2013; </title>
     <link rel="stylesheet" href="./css/apache-maven-fluido-1.3.1.min.css" />
@@ -27,9 +27,9 @@
         <div class="container-fluid">
           <div id="banner">
         <div class="pull-left">
-                                <div id="bannerLeft">
+                                    <a href="http://pcafstockf.github.io/PokerFace/index.html" id="bannerLeft">
                 <h2>PokerFace <(◕___◕)></h2>
-                </div>
+                </a>
                       </div>
         <div class="pull-right">  </div>
         <div class="clear"><hr/></div>
@@ -63,6 +63,13 @@
                 
       <li>
   
+                          <a href="../PokerFace/raw/master/dist/PokerFace-0.9.0-dist.jar" title="Download">
+          <i class="none"></i>
+        Download</a>
+            </li>
+                
+      <li>
+  
                           <a href="quickstart.html" title="Quick Start">
           <i class="none"></i>
         Quick Start</a>
@@ -72,6 +79,13 @@
   
             <a href="#"><i class="none"></i>Scripting</a>
           </li>
+                
+      <li>
+  
+                          <a href="../PokerFace" title="Source Code">
+          <i class="none"></i>
+        Source Code</a>
+            </li>
                 
       <li>
   
@@ -119,7 +133,7 @@
 <div class="section">
 <div class="section">
 <h3><a name="Example"></a>Example</h3>
-<p>To illistrate PokerFace&#x2019;s scripting capabilities let&#x2019;s use a simple A/B test of new layouts for your web application dashboard, found at *<a class="externalLink" href="http://www.mydomain.com/myapp/dashboard.html*">http://www.mydomain.com/myapp/dashboard.html*</a> . For this example, we will define 4 JavaScript endpoints within a <i>script-root-dir</i> directory.</p>
+<p>To illistrate PokerFace&#x2019;s scripting capabilities let&#x2019;s use a simple A/B test of new layouts for your web application dashboard, found at <tt>http://www.mydomain.com/myapp/dashboard.html</tt>. For this example, we will define 4 JavaScript endpoints within a <i>script-root-dir</i> directory.</p>
 
 <div class="source">
 <div class="source">
@@ -133,8 +147,8 @@
    | is-not-an-endpoint.js
  | ?.js
 </pre></div></div>
-<p>Passing <tt>'-scripts script-root-dir'</tt> to PokerFace will activate it&#x2019;s scriptability. The best matching script (if any) will then be selected and run for each client request.</p>
-<p>IMPORTANT: Endpoint matching proceeds from most specific to least specific until an interested endpoint is found (if any). If no interested script endpoint is found, or if a script alters the request, PokerFace will look for a matching remote <a class="externalLink" href="http://">Target</a> and proxy the request out to that Target.</p>
+<p>Passing <tt>'-scripts script-root-dir'</tt> to PokerFace will activate it&#x2019;s scriptability. The script with the longest path match (if any) will then be selected and run for each client request.</p>
+<p>IMPORTANT: Endpoint matching proceeds from most specific to least specific until an interested endpoint is found (if any). If no interested script endpoint is found, or if a script alters the request, PokerFace will look for a matching remote &#x201c;Target&#x201d; and proxy the request out to it.</p>
 <p>Requests for <tt>http://www.mydomain.com/mylib/favlib.js</tt> will result in the <tt>favlib.js.js</tt> endpoint being run (we would expect the script to be written to actually return javascript code of some sort to the client).</p>
 <p>Endpoint matching proceeds from most specific to least specific until an interested endpoint is found (if any).</p>
 <p>Requests for <tt>http://www.mydomain.com/myapp/dashboard.html</tt> will cause the <tt>inspectRequest</tt> method of the <tt>dashboard.html.js</tt> script to be called. If that endpoint chooses <i>not</i> to handle the request, PokerFace will call the <tt>inspectRequest</tt> method of the <tt>script-root-dir/myapp/?.js</tt> script . If that script also does not choose to handle the request, <tt>script-root-dir/?.js</tt> will be called.</p>
@@ -157,8 +171,8 @@
 <div class="section">
 <h3><a name="Implementing_JavaScript_Endpoints"></a>Implementing JavaScript Endpoints</h3>
 <p>You will need to be familiar with the JavaScript language and especially the concept of closures. If you haven&#x2019;t read <a class="externalLink" href="http://www.amazon.com/JavaScript-Good-Parts-Douglas-Crockford/dp/0596517742">JavaScript: The Good Parts</a>, it&#x2019;s a short quick read and I highly recommend it.</p>
-<p>Documentation and comments should be as close as possible to their subject, so please refer to the heavily commented <a href="Samples/ScriptRoot/EndpointTemplate.js">Endpoint Template</a> for remaining script documentation and implementation details. </p>
-<p>You may also want to take a look at the <a href="Samples/ScriptRoot/HelloWorld.html.js">Hello World</a> script.</p></div></div>
+<p>Documentation and comments should be as close as possible to their subject, so please refer to the heavily commented <a class="externalLink" href="https://raw.githubusercontent.com/pcafstockf/PokerFace/master/Samples/ScriptRoot/EndpointTemplate.js">Endpoint Template</a> for remaining script documentation and implementation details. </p>
+<p>You may also want to take a look at the <a class="externalLink" href="https://raw.githubusercontent.com/pcafstockf/PokerFace/master/Samples/ScriptRoot/HelloWorld.html.js">Hello World</a> script.</p></div></div>
                   </div>
             </div>
           </div>
