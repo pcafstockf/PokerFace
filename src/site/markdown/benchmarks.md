@@ -6,7 +6,7 @@ Please keep in mind that the purpose of these benchmarks is not to make definiti
 ###Procedure
 Testing was done on a Macbook with [ab](http://httpd.apache.org/docs/current/programs/ab.html) (Apache Bench) and [siege](http://www.joedog.org/siege-home/) running locally against local server instances of `PokerFace` and [nginx](http://nginx.org) each listening on the loopback interface to eliminate network traffic issues.  Two terminal windows were opened, one to run the server (either PokerFace or nginx) and one to run the load test tool (either ab or siege).
 
-Each server was configured to serve static files from a local directory.  The files and configurations used for each server can be found in the [Samples/Benchmark/](http://) directory of this project.
+Each server was configured to serve static files from a local directory.  The files and configurations used for each server can be found in the [Samples/Benchmark/](https://github.com/pcafstockf/PokerFace/tree/master/Samples/Benchmark) directory of this project.
 
 After starting the server, it was hit with a brief load to warm it up.  This was a clear advantage to PokerFace, as it gave the Java Virtual Machine time to load resources and optimize the bytecode.  Tests were then run a number of times to see that results were consistent across runs.
 

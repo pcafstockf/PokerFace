@@ -3,7 +3,7 @@ PokerFace provides the ability to inspect, delegate, modify, or respond, to any 
 Scripting is enabled by specifiying a root scripts directory which contains JavaScript files overlaying any url endpoints you may wish to override.  The layout of the root directory will mirror the paths of the url's that PokerFace will recieve.  
 
 ###Example
-To illistrate PokerFace's scripting capabilities let's use a simple A/B test of new layouts for your web application dashboard, found at *http://www.mydomain.com/myapp/dashboard.html* .  For this example, we will define 4 JavaScript endpoints within a *script-root-dir* directory.
+To illistrate PokerFace's scripting capabilities let's use a simple A/B test of new layouts for your web application dashboard, found at `http://www.mydomain.com/myapp/dashboard.html`.  For this example, we will define 4 JavaScript endpoints within a *script-root-dir* directory.
 
 ```
 script-root-dir
@@ -17,9 +17,9 @@ script-root-dir
  | ?.js
 ```
 
-Passing `'-scripts script-root-dir'` to PokerFace will activate it's scriptability.  The best matching script (if any) will then be selected and run for each client request.
+Passing `'-scripts script-root-dir'` to PokerFace will activate it's scriptability.  The script with the longest path match (if any) will then be selected and run for each client request.
 
-IMPORTANT: Endpoint matching proceeds from most specific to least specific until an interested endpoint is found (if any).  If no interested script endpoint is found, or if a script alters the request, PokerFace will look for a matching remote [Target](http://) and proxy the request out to that Target.
+IMPORTANT: Endpoint matching proceeds from most specific to least specific until an interested endpoint is found (if any).  If no interested script endpoint is found, or if a script alters the request, PokerFace will look for a matching remote "Target" and proxy the request out to it.
 
 Requests for `http://www.mydomain.com/mylib/favlib.js` will result in the `favlib.js.js` endpoint being run (we would expect the script to be written to actually return javascript code of some sort to the client).
 
@@ -42,6 +42,6 @@ For more information, please see *Implementing JavaScript Endpoints* below.
 ###Implementing JavaScript Endpoints
 You will need to be familiar with the JavaScript language and especially the concept of closures.  If you haven't read [JavaScript: The Good Parts](http://www.amazon.com/JavaScript-Good-Parts-Douglas-Crockford/dp/0596517742), it's a short quick read and I highly recommend it.
 
-Documentation and comments should be as close as possible to their subject, so please refer to the heavily commented [Endpoint Template](Samples/ScriptRoot/EndpointTemplate.js) for remaining script documentation and implementation details.  
+Documentation and comments should be as close as possible to their subject, so please refer to the heavily commented [Endpoint Template](https://raw.githubusercontent.com/pcafstockf/PokerFace/master/Samples/ScriptRoot/EndpointTemplate.js) for remaining script documentation and implementation details.  
 
-You may also want to take a look at the [Hello World](Samples/ScriptRoot/HelloWorld.html.js) script.
+You may also want to take a look at the [Hello World](https://raw.githubusercontent.com/pcafstockf/PokerFace/master/Samples/ScriptRoot/HelloWorld.html.js) script.

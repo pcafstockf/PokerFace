@@ -1,6 +1,6 @@
 ##PokerFace <(◕___◕)>
 
-**PokerFace** is a free, lightweight, asynchronous, streaming, HTTP/1.1, scriptable, open source, **reverse proxy**.  
+**PokerFace** is a Free, lightweight, asynchronous, streaming, scriptable, **reverse proxy**.  
 
 In addition to traditional reverse proxy features such as, http / https sanitizing, load balancing, and ssl bridging, PokerFace is **scriptable**.  
 
@@ -9,11 +9,11 @@ This means it can be used for sophisticated A/B testing, dynamic load balancing,
 Besides its **scriptability**, PokerFace is small (e.g. easy to audit), extremely fast, and portable.  
 It is built on the popular Apache HttpCore NIO libraries to provide top performance, scalability, and standards compliance.
 
-You can [download](https://github.com/pcafstockf/PokerFace/blob/master/dist/PokerFace-0.9.0-dist.jar) the latest self contained executable jar from the dist directory.
+Documentation can be found [here](http://pcafstockf.github.io/PokerFace/index.html).
 
 To get started, please see the [Quick Start Guide](http://pcafstockf.github.io/PokerFace/quickstart.html).
 
-For the curious, here are some unofficial [benchmarks](http://pcafstockf.github.io/PokerFace/benchmarks.html).
+You can [download](https://github.com/pcafstockf/PokerFace/raw/master/dist/PokerFace-0.9.0-dist.jar) the latest self contained executable jar from the dist directory.
 
 Clarity and simplicity are key principles of PokerFace, so suggestions for improving the documentation are eagerly solicited.
 

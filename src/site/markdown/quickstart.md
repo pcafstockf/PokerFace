@@ -7,7 +7,7 @@ You could 'fire up' a simple local reverse proxy with:
 java -jar PokerFace-{version}.jar -listen 127.0.0.1:8080 -target "/*=http://stackoverflow.com"
 ```
 
-This tells PokerFace to listen for http connections on localhost port 8080 and to forward all requests over to our good friends at Stack Overflow: [http://localhost:8080/](http://localhost:8080/)
+This tells PokerFace to listen for http connections on localhost port 8080 and to forward all requests over to our good friends at Stack Overflow which you could see by browsing to [http://localhost:8080/](http://localhost:8080/)
 
 ###Help
 Simple / common scenarios can be easily described via the command line, while more complex scenarios will require a configuration file.  You can get a complete list of command line options with:
@@ -32,7 +32,7 @@ Assuming PokerFace is running on a machine named `www.mydomain.com`, lets walk t
 
 ####new-hotness
 When PokerFace recieves a request for `https://www.mydomain.com/public/foo/bar.html`, it will make a proxy request to `https://new-hotness.mydomain.com/public/foo/bar.html`.  
-However, **if** bar.html contains an absolute link to /assets/my.css, then the browser will request https://www.mydomain.com/assets/my.css, and then PokerFace will return a 404 response (since that does not start with either /public/* or /private/*).
+However, **if** bar.html contains an absolute link to /assets/my.css, then the browser will request `https://www.mydomain.com/assets/my.css`, and PokerFace will return a 404 response (since that does not start with either /public/* or /private/*).
 
 Remember, this DocumentRoot challenge is faced by all reverse proxies. Fortunately, there are work-arounds to solve this problem:
 
@@ -69,5 +69,5 @@ java -classpath "path/to/slf4j-log4j12.jar;path/to/PokerFace-{version}.jar" com.
 	* if >=  1:  Use this number (up to twice the number of physical cores).
 	* if > 0 and < 1: This fraction multiplied by the number of physical cores (e.g. 0.66 would be 2/3 the cores).
 * `-trustany`: Tells PokerFace to ignore any certificate errors that the target servers might generate (e.g. invalid hostname, etc.).
-* `-config`: allows you to specify complex configurations for PokerFace using XML. For instance, you could specify everything except the certificate key password in an XML file and then pass the password on the command line.  Documentation and comments should be as close as possible to their subject, so please see the heavily commented [sample configuration file](Samples/SampleConfig.xml) which discusses all configurable options for PokerFace.
-* `-scripts`, `-watch`, and `-dynamicTargetScripting` options are discussed in [Scripting PokerFace](ScriptingPokerFace.html).
+* `-config`: allows you to specify complex configurations for PokerFace using XML. For instance, you could specify everything except the certificate key password in an XML file and then pass the password on the command line.  Documentation and comments should be as close as possible to their subject, so please see the heavily commented [sample configuration file](https://raw.githubusercontent.com/pcafstockf/PokerFace/master/Samples/SampleConfig.xml) which discusses all configurable options for PokerFace.
+* `-scripts`, `-watch`, and `-dynamicTargetScripting` options are discussed in [Scripting PokerFace](http://pcafstockf.github.io/PokerFace/scripting.html).
