@@ -98,6 +98,7 @@ function loadXMLDoc(filename) {
 	} catch (err) {
 		 // Helping IE11
 	}
+	xhttp.overrideMimeType("text/xml");
 	xhttp.send("");
 	return xhttp.responseXML;
 }
