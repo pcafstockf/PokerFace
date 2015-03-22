@@ -171,7 +171,7 @@
 
 <ul>
   
-<li>Ensure your html uses relative paths to child resources. For example, <a class="externalLink" href="http://old-and-busted.mydomain.com/corp/bar/foo.html&apos;s">http://old-and-busted.mydomain.com/corp/bar/foo.html's</a> link would need to be to ./assets/my.css instead of /assets/my.css. Be careful with this approach though. ../assets/my.css will put you right back in the same 404 response boat.</li>
+<li>Ensure your html uses relative paths to child resources. For example, the &#x201c;<a class="externalLink" href="http://old-and-busted.mydomain.com/corp/bar/foo.html">http://old-and-busted.mydomain.com/corp/bar/foo.html</a>&#x201d; link would need to be to ./assets/my.css instead of /assets/my.css. Be careful with this approach though. ../assets/my.css will put you right back in the same 404 response boat.</li>
   
 <li>The simplest solution is to add an additional target to the configuration such as: <tt>-target &quot;/assets/*=http://old-and-busted.mydomain.com/assets&quot;</tt></li>
 </ul></div>
