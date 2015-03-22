@@ -7,7 +7,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="Date-Revision-yyyymmdd" content="20150303" />
+    <meta name="Date-Revision-yyyymmdd" content="20150321" />
     <meta http-equiv="Content-Language" content="en" />
     <title>PokerFace &#x2013; </title>
     <link rel="stylesheet" href="./css/apache-maven-fluido-1.3.1.min.css" />
@@ -63,23 +63,9 @@
                 
       <li>
   
-                          <a href="https://raw.githubusercontent.com/pcafstockf/PokerFace/master/dist/PokerFace-0.9.0-dist.jar" class="externalLink" title="Download">
+                          <a href="downloads.html" title="Downloads">
           <i class="none"></i>
-        Download</a>
-            </li>
-                
-      <li>
-  
-                          <a href="quickstart.html" title="Quick Start">
-          <i class="none"></i>
-        Quick Start</a>
-            </li>
-                
-      <li>
-  
-                          <a href="scripting.html" title="Scripting">
-          <i class="none"></i>
-        Scripting</a>
+        Downloads</a>
             </li>
                 
       <li>
@@ -128,7 +114,7 @@
                 
         <div id="bodyColumn"  class="span9" >
                                   
-            <p>This document is just a very quick, high level overview of the design, classes, and code for PokerFace. If you are looking for specifics of a paticular class or method, please consult it&#x2019;s Javadoc.</p>
+            <p>This document is just a quick, high level overview of the design, classes, and code for PokerFace. If you are looking for specifics of a paticular class or method, please consult it&#x2019;s Javadoc.</p>
 <p>PokerFace only deals with http/https protocols, and handles everything asynchrounously. Because of that this document will drop the HttpAsync prefixes and suffixes commonly used in <tt>org.apache.http.*</tt>.</p>
 <p>With all the request / response / consumer / producer combinations, it is important to keep these specific meanings straight in your head:</p>
 <p><a name="RequestConsumer"></a><b>Request-Consumer</b>: Consumes an HttpRequest from a client / browser.</p>
@@ -202,7 +188,7 @@
 <div class="source">
 <div class="source">
 <pre>export JAVA_HOME=&quot;`/usr/libexec/java_home -v '1.8*'`&quot;
-mvn clean compile assembly:single site
+mvn clean package site
 </pre></div></div></div></div>
                   </div>
             </div>

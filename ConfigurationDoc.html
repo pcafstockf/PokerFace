@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style type="text/css">
+
+		table.c2 {
+		white-space: nowrap;
+		border: 0px solid black;
+		margin: 0px;
+		padding: 0px;
+		}
+
+		tr.c16 {
+		margin: 0px;
+		padding: 0px;
+		}
+
+		tr.c22 {
+		margin: 8px;
+		height: 20px;
+		}
+		
+		td.txtTop {
+		vertical-align: text-top;
+		}
+
+		td.c1 {
+		border-width: 0px;
+		}
+
+		td.c13 {
+		border-style: solid;
+		border-color: black;
+		border-width: 1px 0px 0px 1px;
+		}
+
+		td.c15 {
+		font-size: 11px;
+		color: rgb(61, 59, 60);
+		padding: 0px 3px 1px;
+		border-style: solid;
+		border-color: black;
+		border-width: 1px 1px 0px;
+		}
+
+		td.c17 {
+		border-style: solid;
+		border-color: black;
+		border-width: 1px 0px 1px 1px;
+		}
+
+		td.c18 {
+		font-size: 11px;
+		color: rgb(61, 59, 60);
+		padding: 0px 3px 1px;
+		border: 1px solid black;
+		}
+
+		span.c12 {
+		font-size: 12px;
+		font-weight: bold;
+		white-space: nowrap;
+		color: rgb(90, 102, 232);
+		}
+
+		span.c14 {
+		font-size: 11px;
+		color: rgb(61, 60, 60);
+		padding: 2px 5px;
+		}
+
+		span.c20 {
+		font-size: 11px;
+		color: rgb(61, 59, 60);
+		padding: 0px 3px 1px;
+		}
+		</style>
+		<title>PokerFace Configuration Files</title>
+<script>
+function toggle(toggleElem) {
+	if (toggleElem.style.display === "block") {
+		toggleElem.style.display = "none";
+	}
+	else {
+		toggleElem.style.display = "block";
+	}
+}
+function loadXMLDoc(filename) {
+	if (window.ActiveXObject) {
+		xhttp = new ActiveXObject("Msxml2.XMLHTTP");
+	}
+	else {
+		xhttp = new XMLHttpRequest();
+	}
+	xhttp.open("GET", filename, false);
+	try {
+		xhttp.responseType = "msxml-document"
+	} catch (err) {
+		 // Helping IE11
+	}
+	xhttp.send("");
+	return xhttp.responseXML;
+}
+
+function displayResult() {
+	var docDiv = document.getElementById("doc");
+	if (! docDiv)
+		return;
+	xml = loadXMLDoc("https://raw.githubusercontent.com/pcafstockf/PokerFace/master/src/main/resources/PokerFace_v1Config.xsd");
+	if (! xml) {
+		docDiv.innerText = "Unable to load XSD";
+		return;
+	}
+	xsl = loadXMLDoc("ConfigurationDoc.xslt");
+	if (! xsl) {
+		docDiv.innerText = "Unable to load XSLT";
+		return;
+	}
+	// code for IE
+	if (window.ActiveXObject || xhttp.responseType == "msxml-document") {
+		ex = xml.transformNode(xsl);
+		if (ex)
+			docDiv.innerHTML = ex;
+		else
+			docDiv.innerText = "Unable to transform";
+	}
+	// code for Chrome, Firefox, Opera, etc.
+	else if (document.implementation && document.implementation.createDocument) {
+		xsltProcessor = new XSLTProcessor();
+		xsltProcessor.importStylesheet(xsl);
+		resultDocument = xsltProcessor.transformToFragment(xml, document);
+		if (resultDocument)
+			docDiv.appendChild(resultDocument);
+		else
+			docDiv.innerText = "Unable to transform";
+	}
+}
+</script>
+<script src="./js/iframeResizer.contentWindow.min.js"></script>
+</head>
+<body onload="displayResult()">
+<div id="doc" />
+</body>
+</html>

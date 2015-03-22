@@ -7,7 +7,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="Date-Revision-yyyymmdd" content="20150303" />
+    <meta name="Date-Revision-yyyymmdd" content="20150321" />
     <meta http-equiv="Content-Language" content="en" />
     <title>PokerFace &#x2013; How fast is PokerFace?</title>
     <link rel="stylesheet" href="./css/apache-maven-fluido-1.3.1.min.css" />
@@ -63,23 +63,9 @@
                 
       <li>
   
-                          <a href="https://raw.githubusercontent.com/pcafstockf/PokerFace/master/dist/PokerFace-0.9.0-dist.jar" class="externalLink" title="Download">
+                          <a href="downloads.html" title="Downloads">
           <i class="none"></i>
-        Download</a>
-            </li>
-                
-      <li>
-  
-                          <a href="quickstart.html" title="Quick Start">
-          <i class="none"></i>
-        Quick Start</a>
-            </li>
-                
-      <li>
-  
-                          <a href="scripting.html" title="Scripting">
-          <i class="none"></i>
-        Scripting</a>
+        Downloads</a>
             </li>
                 
       <li>
@@ -135,12 +121,12 @@
 <div class="section">
 <h3><a name="Procedure"></a>Procedure</h3>
 <p>Testing was done on a Macbook with <a class="externalLink" href="http://httpd.apache.org/docs/current/programs/ab.html">ab</a> (Apache Bench) and <a class="externalLink" href="http://www.joedog.org/siege-home/">siege</a> running locally against local server instances of <tt>PokerFace</tt> and <a class="externalLink" href="http://nginx.org">nginx</a> each listening on the loopback interface to eliminate network traffic issues. Two terminal windows were opened, one to run the server (either PokerFace or nginx) and one to run the load test tool (either ab or siege).</p>
-<p>Each server was configured to serve static files from a local directory. The files and configurations used for each server can be found in the <a class="externalLink" href="https://github.com/pcafstockf/PokerFace/tree/master/Samples/Benchmark">Samples/Benchmark/</a> directory of this project.</p>
-<p>After starting the server, it was hit with a brief load to warm it up. This was a clear advantage to PokerFace, as it gave the Java Virtual Machine time to load resources and optimize the bytecode. Tests were then run a number of times to see that results were consistent across runs.</p></div>
+<p>Each server was configured to serve static files from a local directory. The files and configurations used can be found in the <a class="externalLink" href="https://github.com/pcafstockf/PokerFace/tree/master/Samples/Benchmark">Samples/Benchmark/</a> directory of this project.</p>
+<p>After starting a server, it was hit with a brief load to warm it up. This was a clear advantage to PokerFace, as it gave the Java Virtual Machine time to load resources and optimize the bytecode. Tests were then run a number of times to see that results were consistent across runs.</p></div>
 <div class="section">
 <h3><a name="ab_v2.3"></a>ab v2.3</h3>
 <p>(ab -k -c 50 -t 0 -L Samples/Benchmark/urls.txt)</p>
-<p>Please note: There is a publiclly available <a class="externalLink" href="http://code.google.com/p/apachebench-for-multi-url/">multi-url patch for ab</a> which allows you to to test multiple url&#x2019;s similar to the way <tt>siege</tt> works.</p>
+<p>Please note: There is a publiclly available <a class="externalLink" href="http://code.google.com/p/apachebench-for-multi-url/">multi-url patch for ab</a> which allows <tt>ab</tt> to test multiple url&#x2019;s similar to the way <tt>siege</tt> works.</p>
 <div class="section">
 <div class="section">
 <div class="section">
