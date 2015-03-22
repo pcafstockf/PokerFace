@@ -16,7 +16,7 @@
 	<server cpu="0.66" soTimeout="0" >
 		<!-- 
 			Multiple listen elements may be specified. If none are specified, PokerFace default to an http listener on 127.0.0.1:8080
-			The listen element may contain the following attriutes:
+			The listen element may contain the following attributes:
 	 			'address':	Interface on which to listen for incoming connections (optional, defaults to 0.0.0.0) 
 				'port':		Port on which to listen for incoming connections (optional, defaults to 80 for insecure and 443 for secure) 
 				NOTE: If any of the below encryption options are specified, a 'keystore' element MUST be specified below 

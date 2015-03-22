@@ -28,9 +28,7 @@
 	<body>
 		<menu>
 			<item name="Introduction" href="./index.html" />
-			<item name="Download" href="https://raw.githubusercontent.com/pcafstockf/PokerFace/master/dist/PokerFace-0.9.0-dist.jar" />
-			<item name="Quick Start" href="./quickstart.html" />
-			<item name="Scripting" href="./scripting.html" />
+			<item name="Downloads" href="./downloads.html" />
 			<item name="Source Code" href="https://www.github.com/pcafstockf/PokerFace" />
 			<item name="Benchmarks" href="./benchmarks.html" />
 			<item name="Dev Guide" href="./overview-dev.html" />

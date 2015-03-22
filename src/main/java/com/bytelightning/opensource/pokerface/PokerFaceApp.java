@@ -49,10 +49,14 @@ import org.xml.sax.SAXException;
  */
 public class PokerFaceApp {
 	public static void main(String[] args) {
+	    if (JavaVersionAsFloat() < (1.8f - Float.MIN_VALUE)) {
+	    	System.err.println("PokerFace requires at least Java v8 to run.");
+	    	return;
+	    }
 		// Configure the command line options parser
 		Options options = new Options();
 		options.addOption("h", false, "help");
-		options.addOption("listen", true, "(http=|)Address:Port for http or (https|secure|tls|ssl|CertAlias)=Address:Port for https servers.");
+		options.addOption("listen", true, "(http,https,secure,tls,ssl,CertAlias)=Address:Port for https.");
 		options.addOption("keystore", true, "Filepath for PokerFace certificate keystore.");
 		options.addOption("storepass", true, "The store password of the keystore.");
 		options.addOption("keypass", true, "The key password of the keystore.");
@@ -60,11 +64,12 @@ public class PokerFaceApp {
 		options.addOption("servercpu", true, "Number of cores the server should use.");
 		options.addOption("targetcpu", true, "Number of cores the http targets should use.");
 		options.addOption("trustany", false, "Ignore certificate identity errors from target servers.");
+		options.addOption("files", true, "Filepath to a directory of static files.");
 		options.addOption("config", true, "Path for XML Configuration file.");
 		options.addOption("scripts", true, "Filepath for root scripts directory.");
 		options.addOption("library", true, "JavaScript library to load into global context.");
-		options.addOption("watch", false, "Watch scripts directory for changes.");
-		options.addOption("dynamicTargetScripting", false, "WARNING! This option allows scripts to redirect requests to *any* other server.");
+		options.addOption("watch", false, "Dynamically watch scripts directory for changes.");
+		options.addOption("dynamicTargetScripting", false, "WARNING! This option allows scripts to redirect requests to *any* other remote server.");
 		
 		CommandLine cmdLine = null;
 		// parse the command line.
@@ -152,15 +157,17 @@ public class PokerFaceApp {
 						else if (addrPos + 1 >= serverStrs[i].length())
 							throw new IllegalArgumentException("Invalid http argument.");
 						addrStr = serverStrs[i].substring(addrPos+1, serverStrs[i].length());
-						String type = serverStrs[i].substring(0, addrPos);
-						if (type.equalsIgnoreCase("http"))
-							;
-						else if (type.equalsIgnoreCase("https") || type.equalsIgnoreCase("secure"))
-							https = true;
-						else if (type.equalsIgnoreCase("tls") || type.equalsIgnoreCase("ssl"))
-							protocol = type.toUpperCase();
-						else
-							alias = type;
+						String[] types = serverStrs[i].substring(0, addrPos).split(",");
+						for (String type : types) {
+							if (type.equalsIgnoreCase("http"))
+								break;
+							else if (type.equalsIgnoreCase("https") || type.equalsIgnoreCase("secure"))
+								https = true;
+							else if (type.equalsIgnoreCase("tls") || type.equalsIgnoreCase("ssl"))
+								protocol = type.toUpperCase();
+							else
+								alias = type;
+						}
 					}
 					else
 						addrStr = serverStrs[i];
@@ -181,6 +188,16 @@ public class PokerFaceApp {
 				if (clientcpu != null)
 					config.setProperty("targets[@cpu]", clientcpu);
 
+				// Configure static files
+				if (cmdLine.hasOption("files")) {
+					Path tmp = Utils.MakePath(cmdLine.getOptionValue("files"));
+					if (!Files.exists(tmp))
+						throw new FileNotFoundException("Files directory does not exist.");
+					if (!Files.isDirectory(tmp))
+						throw new FileNotFoundException("'files' path is not a directory.");
+					config.setProperty("files.rootDirectory", tmp.toAbsolutePath().toUri());
+				}
+				
 				// Configure scripting
 				if (cmdLine.hasOption("scripts")) {
 					Path tmp = Utils.MakePath(cmdLine.getOptionValue("scripts"));
@@ -314,5 +331,18 @@ public class PokerFaceApp {
 		catch (MalformedURLException ex) {
 			throw new IllegalArgumentException("Invalid http(s) address specified.");
 		}
+	}
+
+	private static float JavaVersionAsFloat() {
+		final String[] toParse = System.getProperty("java.version")
+				.split("\\.");
+		if (toParse.length >= 2) {
+			try {
+				return Float.parseFloat(toParse[0] + '.' + toParse[1]);
+			} catch (final NumberFormatException nfe) {
+				// just fall through
+			}
+		}
+		return -1;
 	}
 }

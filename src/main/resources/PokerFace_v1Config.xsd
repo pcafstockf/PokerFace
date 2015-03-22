@@ -1,206 +1,274 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.bytelightning.com/opensource.pokerface/xsd/v1">
-  <xs:element name="configuration">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="server" minOccurs="1" maxOccurs="1">
-          <xs:annotation>
-            <xs:documentation><![CDATA[There must be one an only one 'server' element.
-		It may contain the following attributes:
-		'cpu':			<= 0: Use actual number of physical cpu cores in the machine.
-		 				>=  1:  The number (up to twice the number of physical cpu cores).
-		 				> 0 && < 1: The number multiplied by the number of physical cpu cores 
-		 				(optional, defaults to 0.66)
-		'soTimeout':	Enable/disable SO_TIMEOUT (in milliseconds).  The timeout must be > 0. A timeout of zero is interpreted as an infinite timeout. (optional, defaults to 0)]]></xs:documentation>
-          </xs:annotation>
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element name="listen" minOccurs="0" maxOccurs="unbounded" >
-                <xs:annotation>
-                  <xs:documentation>Multiple listen elements may be specified. If none are specified, PokerFace default to an http listener on 127.0.0.1:8080
-			The listen element may contain the following attriutes:
-	 			'address':	Interface on which to listen for incoming connections (optional, defaults to 0.0.0.0) 
-				'port':		Port on which to listen for incoming connections (optional, defaults to 80 for insecure and 443 for secure) 
-				NOTE: If any of the below encryption options are specified, a 'keystore' element MUST be specified below 
-				'secure':	Should encryption be enabled for this port (optional, defaults to false) 
-				'protocol':	Type of encryption to use for this port.  If specified, 'secure' is automatically set to 'true'. (optional, defaults to no encryption) 
-				'alias':	Alias of keystore certificate representing this server.  If specified, 'secure' is automatically set to 'true'. (optional, if not specified, default java certificate selection will be used) 
-				'trustAny':	Trust any certificate a client/browser might present. If false, the client must present a certificate that can be validated by our keystore (below). (optional, defaults to true)</xs:documentation>
-                </xs:annotation>
-                <xs:complexType>
-                  <xs:simpleContent>
-                    <xs:extension base="xs:string">
-                      <xs:attribute type="xs:string" name="address"/>
-                      <xs:attribute type="xs:short" name="port"/>
-                      <xs:attribute type="xs:boolean" name="secure"/>
-                      <xs:attribute type="xs:string" name="protocol"/>
-                      <xs:attribute type="xs:string" name="alias"/>
-                      <xs:attribute type="xs:boolean" name="trustAny"/>
-                    </xs:extension>
-                  </xs:simpleContent>
-                </xs:complexType>
-              </xs:element>
-             <xs:element type="xs:string" name="serverAgent"  minOccurs="0" maxOccurs="1">
-                <xs:annotation>
-                  <xs:documentation>Defaults to the current version of PokerFace.  
-			This will be sent back in the HTTP 'Via' header.  
-			If you must override it, please give PokerFace some credit :-) as this is how we track it's popularity, and in turn attract folks to help enhance and develop it.</xs:documentation>
-                </xs:annotation>
-              </xs:element>
-            </xs:sequence>
-            <xs:attribute type="xs:float" name="cpu"/>
-            <xs:attribute type="xs:int" name="soTimeout"/>
-            <xs:attribute type="xs:int" name="soLinger"/>
-          </xs:complexType>
-        </xs:element>
-        <xs:element type="xs:string" name="keystore" minOccurs="0" maxOccurs="1">
-          <xs:annotation>
-            <xs:documentation>File path to the certificate keystore.  (optional) 
-		The keystore must be of the type specified by the system property 'keystore.type' which defaults to 'jks'
-		NOTE: If any of the listen elements above specify an encrypted connection, a keystore (and keypass) must be specified.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element type="xs:string" name="storepass" minOccurs="0" maxOccurs="1">
-          <xs:annotation>
-            <xs:documentation>The password used to check the integrity of or unlock (e.g. the keystore resides on a hardware token device), the keystore. (optional, defaults to null a.k.a. none)</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element type="xs:string" name="keypass" minOccurs="0" maxOccurs="1">
-          <xs:annotation>
-            <xs:documentation>The password for recovering keys in the KeyStore (required only if a keystore is specified, but may be an empty string)</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="targets" minOccurs="0" maxOccurs="1">
-          <xs:annotation>
-            <xs:documentation>'targets' supports the same xml attributes as 'server' above, plus:
-			'connectTimeout':	Amount of time (in milliseconds) that the connection will block until established or an error occurs. A timeout of zero is interpreted as an infinite timeout. (optional, defaults to 0) 
-			'bufferSize':		Buffer size (in KiloBytes) to be used for proxying each connection between the client and a remote target (optional, defaults to 1024K) 
-			'trustAny':			Ignore any certificate errors presented by any of the below configured targets (optional, defaults to false) 
-			'protocol':			Encryption protocol that PokerFace should request when communicating with the below configured targets (optional, defaults to "TLS") 
-			'connMaxTotal':		Maximum number of total connections to remote targets at any given time.  
-									 NOTE:  Because PokerFace uses Async NIO, this can be a very high number, BUT should be just less than the number of open sockets supported by your system.
-									 (optional, defaults to 1023)
-			'connMaxPerRoute':	Maximum number of connections to any one remote target at a time.  
-									 NOTE:  Because PokerFace uses Async NIO, this can be a very high number, BUT should be just less than the number of open sockets supported by your system.
-									 (optional, defaults to 1023)</xs:documentation>
-          </xs:annotation>
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element name="target"  minOccurs="1" maxOccurs="unbounded" >
-                <xs:annotation>
-                  <xs:documentation>Multiple target elements may be specified.  You could have zero elements however if your scripts were handling all requests. 
-			It is perfectly fine to have multiple target's pointing at the same host, but with different 'pattern's.
-			NOTE: The ordering of 'target' elements is honored, so you should list more specific target's first.
-			ALSO: PLEASE see the Quick Start Guide for a discussion about the 'DocumentRoot' problem that all http proxies face.
-			Uri/Url request patterns received from the client/browser which match this expression will be forwarded to this target (unless overridden by a script).
-				'pattern':	Patterns may begin or end with a wildcard '*', but will be ignored elsewhere.
-								Incoming requests that do not match any of the target patterns will cause PokerFace to return a 404 (NOT_FOUND).
-								(required).
-				'url':		Url of the that should be prepended to the request received from the client/browser before issuing a request to this target.
-								(required).
-								NOTE: The '#' anchor itself is optional but if present indicates how many characters should be stripped from the front of the client/browser request before adding it to this 'url' (Please see the Quick Start Guide for further explanation).</xs:documentation>
-                </xs:annotation>
-                <xs:complexType>
-                  <xs:simpleContent>
-                    <xs:extension base="xs:string">
-                      <xs:attribute type="xs:anyURI" name="pattern"/>
-                      <xs:attribute type="xs:anyURI" name="url"/>
-                    </xs:extension>
-                  </xs:simpleContent>
-                </xs:complexType>
-              </xs:element>
-             <xs:element type="xs:string" name="userAgent" minOccurs="0" maxOccurs="1">
-                <xs:annotation>
-                  <xs:documentation>Defaults to the current version of PokerFace.  
-			This will be used for all requests to the configured remote targets above.  
-			If you must override it, please give PokerFace some credit :-) as this is how we track it's popularity, and in turn attract folks to help enhance and develop it.</xs:documentation>
-                </xs:annotation>
-              </xs:element>
-            </xs:sequence>
-            <xs:attribute type="xs:float" name="cpu"/>
-            <xs:attribute type="xs:int" name="soTimeout"/>
-            <xs:attribute type="xs:int" name="soLinger"/>
-            <xs:attribute type="xs:int" name="connectTimeout"/>
-            <xs:attribute type="xs:short" name="bufferSize"/>
-            <xs:attribute type="xs:boolean" name="trustAny"/>
-            <xs:attribute type="xs:string" name="protocol"/>
-            <xs:attribute type="xs:int" name="connMaxTotal"/>
-            <xs:attribute type="xs:int" name="connMaxPerRoute"/>
-          </xs:complexType>
-        </xs:element>
-        <xs:element name="scripts" minOccurs="0" maxOccurs="1">
-          <xs:annotation>
-            <xs:documentation>Configure Nashorn based scripts (optional element)
-		Please see the Scripting PokerFace Guide for for more details</xs:documentation>
-          </xs:annotation>
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element type="xs:string" name="rootDirectory" minOccurs="1" maxOccurs="1">
-                <xs:annotation>
-                  <xs:documentation>File path to a root directory containing the scripts. (required)</xs:documentation>
-                </xs:annotation>
-              </xs:element>
-              <xs:element type="xs:boolean" name="dynamicWatch" minOccurs="0" maxOccurs="1">
-                <xs:annotation>
-                  <xs:documentation>If true PokerFace will watch the 'rootDirectory' for script changes and dynamically load, modify, delete script endpoints as the file system changes. (optional, defaults to false)</xs:documentation>
-                </xs:annotation>
-              </xs:element>
-              <xs:element type="xs:boolean" name="dynamicTargetScripting" minOccurs="0" maxOccurs="1">
-                <xs:annotation>
-                  <xs:documentation>If true, PokerFace will allow scripts to dynamically specify remote targets *not* in the configured list above.  Use this option wisely! (optional, defaults to false)</xs:documentation>
-                </xs:annotation>
-              </xs:element>
-              <xs:element type="xs:string" name="library" minOccurs="0" maxOccurs="unbounded" >
-                <xs:annotation>
-                  <xs:documentation>Path to a Javascript library that will be preloaded into the Nashorn script engine (optional, multiple library elements may be specified).  
-			WARNING:
-				You will still need to respect the mutability/immutability constraints of the endpoint methods.  
-				In other words, the library may NOT modify its own internal state when called from an immutable endpoint method.</xs:documentation>
-                </xs:annotation>
-              </xs:element>
-              <xs:element name="scriptConfig" minOccurs="0" maxOccurs="1">
-                <xs:annotation>
-                  <xs:documentation>The 'scriptConfig' element (if present) will be passed to the 'setup' method of every JavaScript endpoint in the root script directory.
-			The content of this element may be any well formed xml.</xs:documentation>
-                </xs:annotation>
-          		<xs:complexType>
-            		<xs:sequence>
-      					<xs:any namespace="##any" minOccurs="0" processContents="lax" maxOccurs="unbounded" />
-            		</xs:sequence>
-          		</xs:complexType>
-              </xs:element>
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
-		
-        <xs:element name="files" minOccurs="0" maxOccurs="1">
-          <xs:annotation>
-            <xs:documentation>Configure PokerFace to serve static files from a root directory</xs:documentation>
-          </xs:annotation>
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element type="xs:string" name="rootDirectory" minOccurs="1" maxOccurs="1">
-                <xs:annotation>
-                  <xs:documentation>File path to a root directory containing the scripts. (required)</xs:documentation>
-                </xs:annotation>
-              </xs:element>
-              <xs:element name="mime-entry" minOccurs="0"  maxOccurs="unbounded">
-                <xs:annotation>
-                  <xs:documentation>Additional Mime Type/Extensions mappings (PokerFace already knows the basic ones)</xs:documentation>
-                </xs:annotation>
-          		<xs:complexType>
-            		<xs:attribute type="xs:string" name="type"/>
-            		<xs:attribute type="xs:string" name="extensions">
-	                <xs:annotation>
-	                  <xs:documentation>Comma seperated list of applicable extensions (.otf,.ttf)</xs:documentation>
-	                </xs:annotation>
-	                </xs:attribute>
-          		</xs:complexType>
-              </xs:element>
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
+	<xs:element name="configuration">
+		<xs:annotation>
+			<xs:documentation>Root configuration element for PokerFace</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="server" minOccurs="1" maxOccurs="1">
+					<xs:annotation>
+						<xs:documentation>There must be one and only one 'server' element.</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="listen" minOccurs="0" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>Multiple listen elements may be specified. If none are specified, PokerFace default to an http listener on 127.0.0.1:8080<br />
+NOTE: If any of 'secure', 'protocol', 'alias', 'trustAny' attributes are specified, a 'keystore' element MUST be specified</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:simpleContent>
+										<xs:extension base="xs:string">
+											<xs:attribute type="xs:string" name="address">
+												<xs:annotation>
+													<xs:documentation>Interface on which to listen for incoming connections (optional, defaults to 0.0.0.0)</xs:documentation>
+												</xs:annotation>
+											</xs:attribute>
+											<xs:attribute type="xs:short" name="port">
+												<xs:annotation>
+													<xs:documentation>Port on which to listen for incoming connections (optional, defaults to 80 for insecure and 443 for secure) </xs:documentation>
+												</xs:annotation>
+											</xs:attribute>
+											<xs:attribute type="xs:boolean" name="secure">
+												<xs:annotation>
+													<xs:documentation>Should encryption be enabled for this port (optional, defaults to false) </xs:documentation>
+												</xs:annotation>
+											</xs:attribute>
+											<xs:attribute type="xs:string" name="protocol">
+												<xs:annotation>
+													<xs:documentation>Type of encryption to use for this port. If specified, 'secure' is automatically set to 'true'. (optional, defaults to no encryption) </xs:documentation>
+												</xs:annotation>
+											</xs:attribute>
+											<xs:attribute type="xs:string" name="alias">
+												<xs:annotation>
+													<xs:documentation>Alias of keystore certificate representing this server. If specified, 'secure' is automatically set to 'true'. (optional, if not specified, default java certificate selection will be used) </xs:documentation>
+												</xs:annotation>
+											</xs:attribute>
+											<xs:attribute type="xs:boolean" name="trustAny">
+												<xs:annotation>
+													<xs:documentation>Trust any certificate a client/browser might present. If false, the client must present a certificate that can be validated by our keystore (below). (optional, defaults to true)</xs:documentation>
+												</xs:annotation>
+											</xs:attribute>
+										</xs:extension>
+									</xs:simpleContent>
+								</xs:complexType>
+							</xs:element>
+							<xs:element type="xs:string" name="serverAgent" minOccurs="0" maxOccurs="1">
+								<xs:annotation>
+									<xs:documentation>Defaults to the current version of PokerFace.<br />
+This will be sent back in the HTTP 'Via' header.<br />
+If you must override it, please give PokerFace some credit :-) as this is how we track it's popularity, and in turn attract folks to help enhance and develop it.</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+						<xs:attribute type="xs:float" name="cpu">
+							<xs:annotation>
+								<xs:documentation>&lt;= 0: Use same numer of threads as the actual number of physical cpu cores in the machine.<br />
+&lt;= 1: The number of threads (up to twice the number of physical cpu cores).<br />
+&gt; 0 &amp;&amp; &lt; 1: The number multiplied by the number of physical cpu cores (optional, defaults to 0.66).</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+						<xs:attribute type="xs:int" name="soTimeout">
+							<xs:annotation>
+								<xs:documentation>Enable/disable SO_TIMEOUT (in milliseconds). The timeout must be &gt; 0. A timeout of zero is interpreted as an infinite timeout. (optional, defaults to 0)</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+						<xs:attribute type="xs:int" name="soLinger">
+							<xs:annotation>
+								<xs:documentation>Enable/disable SO_LINGER (in milliseconds).  (optional, defaults to -1)</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+					</xs:complexType>
+				</xs:element>
+				<xs:element type="xs:string" name="keystore" minOccurs="0" maxOccurs="1">
+					<xs:annotation>
+						<xs:documentation>File path to the certificate keystore. (optional)<br />
+The keystore must be of the type specified by the system property 'keystore.type' which defaults to 'jks'
+NOTE: If any of the listen elements above specify an encrypted connection, a keystore (and keypass) must be specified.</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element type="xs:string" name="storepass" minOccurs="0" maxOccurs="1">
+					<xs:annotation>
+						<xs:documentation>The password used to check the integrity of or unlock (e.g. the keystore resides on a hardware token device), the keystore. (optional, defaults to null a.k.a. none)</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element type="xs:string" name="keypass" minOccurs="0" maxOccurs="1">
+					<xs:annotation>
+						<xs:documentation>The password for recovering keys in the KeyStore (required only if a keystore is specified, but may be an empty string)</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="targets" minOccurs="0" maxOccurs="1">
+					<xs:annotation>
+						<xs:documentation>List of remote Target's to proxy.</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="target" minOccurs="1" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>Multiple target elements may be specified. You could have zero elements however if your scripts were handling all requests.<br />
+It is perfectly fine to have multiple target's pointing at the same host, but with different 'pattern's.<br />
+NOTE: The ordering of 'target' elements is honored, so you should list more specific target's first.<br />
+ALSO: PLEASE see the Quick Start Guide for a discussion about the 'DocumentRoot' problem that all http proxies face.<br />
+Uri/Url request patterns received from the client/browser which match this expression will be forwarded to this target (unless overridden by a script).<br />
+Incoming requests that do not match any of the target patterns will cause PokerFace to return a 404 (NOT_FOUND).</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:simpleContent>
+										<xs:extension base="xs:string">
+											<xs:attribute type="xs:anyURI" name="pattern">
+												<xs:annotation>
+													<xs:documentation>Patterns may begin or end with a wildcard '*', but will be ignored elsewhere.</xs:documentation>
+												</xs:annotation>
+											</xs:attribute>
+											<xs:attribute type="xs:anyURI" name="url">
+												<xs:annotation>
+													<xs:documentation>Url of the that should be prepended to the request received from the client/browser before issuing a request to this target.<br />
+NOTE: The '#' anchor itself is optional but if present indicates how many characters should be stripped from the front of the client/browser request before adding it to this 'url' (Please see the Quick Start Guide for further explanation).</xs:documentation>
+												</xs:annotation>
+											</xs:attribute>
+										</xs:extension>
+									</xs:simpleContent>
+								</xs:complexType>
+							</xs:element>
+							<xs:element type="xs:string" name="userAgent" minOccurs="0" maxOccurs="1">
+								<xs:annotation>
+									<xs:documentation>Defaults to the current version of PokerFace.<br />
+This will be used for all requests to the configured remote targets above.
+If you must override it, please give PokerFace some credit :-) as this is how we track it's popularity, and in turn attract folks to help enhance and develop it.</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+							<xs:attribute type="xs:float" name="cpu">
+							<xs:annotation>
+								<xs:documentation>&lt;= 0: Use the same number of threads as the actual number of physical cpu cores in the machine.<br />
+&lt;= 1: The number of threads (up to twice the number of physical cpu cores).<br />
+&gt; 0 &amp;&amp; &lt; 1: The number multiplied by the number of physical cpu cores (optional, defaults to 0.66).</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+						<xs:attribute type="xs:int" name="soTimeout">
+							<xs:annotation>
+								<xs:documentation>Enable/disable SO_TIMEOUT (in milliseconds). The timeout must be &gt; 0. A timeout of zero is interpreted as an infinite timeout. (optional, defaults to 0)</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+						<xs:attribute type="xs:int" name="soLinger">
+							<xs:annotation>
+								<xs:documentation>Enable/disable SO_LINGER (in milliseconds).  (optional, defaults to -1)</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+						<xs:attribute type="xs:int" name="connectTimeout">
+							<xs:annotation>
+								<xs:documentation>Amount of time (in milliseconds) that the connection will block until established or an error occurs. A timeout of zero is interpreted as an infinite timeout. (optional, defaults to 0)</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+						<xs:attribute type="xs:short" name="bufferSize">
+							<xs:annotation>
+								<xs:documentation>Buffer size (in KiloBytes) to be used for proxying each connection between the client and a remote target (optional, defaults to 1024K)</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+						<xs:attribute type="xs:boolean" name="trustAny">
+							<xs:annotation>
+								<xs:documentation>Ignore any certificate errors presented by any of the below configured targets (optional, defaults to false)</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+						<xs:attribute type="xs:string" name="protocol">
+							<xs:annotation>
+								<xs:documentation>Encryption protocol that PokerFace should request when communicating with the below configured targets (optional, defaults to "TLS")</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+						<xs:attribute type="xs:int" name="connMaxTotal">
+							<xs:annotation>
+								<xs:documentation>Maximum number of total connections to remote targets at any given time.<br />
+NOTE: Because PokerFace uses Async NIO, this can be a very high number, BUT should be just less than the number of open sockets supported by your system.<br />
+(optional, defaults to 1023)</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+						<xs:attribute type="xs:int" name="connMaxPerRoute">
+							<xs:annotation>
+								<xs:documentation>Maximum number of connections to any one remote target at a time.<br />
+NOTE: Because PokerFace uses Async NIO, this can be a very high number, BUT should be just less than the number of open sockets supported by your system.<br />
+(optional, defaults to 1023)</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="scripts" minOccurs="0" maxOccurs="1">
+					<xs:annotation>
+						<xs:documentation>Configure Nashorn based scripts (optional element)<br />
+Please see the Scripting PokerFace Guide for for more details</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element type="xs:string" name="rootDirectory" minOccurs="1" maxOccurs="1">
+								<xs:annotation>
+									<xs:documentation>File path to a root directory containing the scripts. (required)</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element type="xs:boolean" name="dynamicWatch" minOccurs="0" maxOccurs="1">
+								<xs:annotation>
+									<xs:documentation>If true PokerFace will watch the 'rootDirectory' for script changes and dynamically load, modify, delete script endpoints as the file system changes. (optional, defaults to false)</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element type="xs:boolean" name="dynamicTargetScripting" minOccurs="0" maxOccurs="1">
+								<xs:annotation>
+									<xs:documentation>If true, PokerFace will allow scripts to dynamically specify remote targets *not* in the configured list above. Use this option wisely! (optional, defaults to false)</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element type="xs:string" name="library" minOccurs="0" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>Path to a Javascript library that will be preloaded into the Nashorn script engine (optional, multiple library elements may be specified).<br />
+WARNING:<br />
+You will still need to respect the mutability/immutability constraints of the endpoint methods.<br />
+In other words, the library may NOT modify its own internal state when called from an immutable endpoint method.</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="scriptConfig" minOccurs="0" maxOccurs="1">
+								<xs:annotation>
+									<xs:documentation>The 'scriptConfig' element (if present) will be passed to the 'setup' method of every JavaScript endpoint in the root script directory.<br />
+The content of this element may be any well formed xml.</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence>
+										<xs:any namespace="##any" minOccurs="0" processContents="lax" maxOccurs="unbounded" />
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+
+				<xs:element name="files" minOccurs="0" maxOccurs="1">
+					<xs:annotation>
+						<xs:documentation>Configure PokerFace to serve static files from a root directory</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element type="xs:string" name="rootDirectory" minOccurs="1" maxOccurs="1">
+								<xs:annotation>
+									<xs:documentation>File path to a root directory containing the static files to be served. (required)</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="mime-entry" minOccurs="0" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>Additional Mime Type/Extensions mappings (PokerFace already knows the basic ones)</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:attribute type="xs:string" name="type">
+										<xs:annotation>
+											<xs:documentation>Standard format mime type.</xs:documentation>
+										</xs:annotation>
+									</xs:attribute>
+									<xs:attribute type="xs:string" name="extensions">
+										<xs:annotation>
+											<xs:documentation>Comma separated list of applicable extensions (.otf,.ttf)</xs:documentation>
+										</xs:annotation>
+									</xs:attribute>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
 </xs:schema>

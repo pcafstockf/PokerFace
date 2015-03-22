@@ -12,11 +12,9 @@
 		es: { }
 	};
 	return {
-		apiVersion: function() {
-			return 1;
-		},
+		apiVersion: 1,
 		
-		setup: function(path, config, callback, logger) {
+		setup: function(path, config, logger, callback) {
 			// Populate any muttable locale data.
 			localeData.en.formatter = moment();
 			localeData.en.formatter.locale('en');
@@ -27,9 +25,12 @@
 			localeData.es.formatter = moment();
 			localeData.es.formatter.locale('es');
 			localeData.es.message = config.getString('es');
-			
-			logger.info(path + ' setup successfully.');
-			callback.setupComplete();
+
+			var Thread = Java.type('java.lang.Thread');
+			new Thread(function() {
+				logger.info(path + ' setup successfully.');
+				callback.setupComplete();
+			}).start();
 		},
 		
 		inspectRequest: function(request, context) {

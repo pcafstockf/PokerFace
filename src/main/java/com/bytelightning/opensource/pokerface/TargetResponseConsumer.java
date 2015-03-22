@@ -96,7 +96,7 @@ public class TargetResponseConsumer extends TargetBase implements HttpAsyncRespo
 		r.setHeader(CreateHttpViaHeader(response.getFirstHeader("Via"), response.getProtocolVersion()));
 		
 		// If a script endpoint was specified, give it a chance to alter the response.
-		if (endpoint != null) {
+		if ((endpoint != null) && (endpoint.hasMember("inspectResponse"))) {
 			Object result = endpoint.callMember("inspectResponse", r, context);
 			if (result instanceof HttpResponse)
 				r = (HttpResponse)result;
@@ -137,7 +137,7 @@ public class TargetResponseConsumer extends TargetBase implements HttpAsyncRespo
 			return;
 		completed = true;
 		producersBuffer.writeCompleted();
-		if (endpoint != null)
+		if ((endpoint != null) && endpoint.hasMember("responseCompleted"))
 			endpoint.callMember("responseCompleted", context, null);
 		String id = (String)context.getAttribute("pokerface.txId");
 		Logger.debug("[proxy<-target] " + id + " response completed");
@@ -153,7 +153,7 @@ public class TargetResponseConsumer extends TargetBase implements HttpAsyncRespo
 			return;
 		completed = true;
 		producersBuffer.writeCompleted();
-		if (endpoint != null)
+		if ((endpoint != null) && endpoint.hasMember("responseCompleted"))
 			endpoint.callMember("responseCompleted", context, ex);
 		producer.setException(ex);
 	}

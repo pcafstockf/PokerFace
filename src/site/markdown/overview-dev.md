@@ -1,4 +1,4 @@
-This document is just a very quick, high level overview of the design, classes, and code for PokerFace.  If you are looking for specifics of a paticular class or method, please consult it's Javadoc.
+This document is just a quick, high level overview of the design, classes, and code for PokerFace.  If you are looking for specifics of a paticular class or method, please consult it's Javadoc.
 
 PokerFace only deals with http/https protocols, and handles everything asynchrounously.  Because of that this document will drop the HttpAsync prefixes and suffixes commonly used in `org.apache.http.*`.
 
@@ -47,5 +47,5 @@ On a Mac:
 
 ```
 export JAVA_HOME="`/usr/libexec/java_home -v '1.8*'`"
-mvn clean compile assembly:single site
+mvn clean package site
 ```

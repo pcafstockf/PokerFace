@@ -130,7 +130,7 @@ public class RequestHandler implements HttpAsyncRequestHandler<ResponseProducer>
 			if (method.equals("GET") || method.equals("HEAD")) {
 				try {
 					Path rsrcPath = staticFilesPath.resolve(uriStr.replaceAll("\\.\\./", "/").substring(1));
-					if (Files.exists(rsrcPath))
+					if (Files.exists(rsrcPath) && Files.isRegularFile(rsrcPath))
 						return new RequestForFileConsumer(context, rsrcPath.toFile());
 				}
 				catch (Exception ex) {
@@ -157,7 +157,7 @@ public class RequestHandler implements HttpAsyncRequestHandler<ResponseProducer>
 				String logPrefix = sb.toString();
 				scriptContext = new BasicHttpContext(context);
 				scriptContext.setAttribute("pokerface.scriptHelper", new ScriptHelperImpl(request, context, bufferPool));
-				scriptContext.setAttribute("pokerface.scripts", scripts);
+				scriptContext.setAttribute("pokerface.endpoints", scripts);
 				scriptContext.setAttribute("pokerface.scriptLogger", ScriptHelper.ScriptLogger);
 //FIXME: Test out the recursively higher script selection.
 //FIXME: Add ignore of # directories (don't forget to update the file watcher to ignore them as well)

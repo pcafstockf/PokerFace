@@ -570,7 +570,8 @@ public class PokerFace {
 
 						@Override
 						public Void call() {
-							endpoint.callMember("teardown");
+							if (endpoint.hasMember("teardown"))
+								endpoint.callMember("teardown");
 							return null;
 						}
 					}
@@ -658,14 +659,6 @@ public class PokerFace {
 	private static ScheduledExecutorService ScriptCompilationExecutor;
 	private DirectoryWatchService ScriptDirectoryWatcher;
 
-	/**
-	 * Invoked by script endpoints to let PokerFace know they have completed their setup process.
-	 */
-	public static interface SetupCompleteCallback {
-		public void setupComplete();
-		public void setupFailed(String msg);
-	}
-	
 	// Internal class to keep track of the uriKey associated with a loaded ScriptObjectMirror.
 	private static final class JavaScriptEndPoint {
 		public JavaScriptEndPoint(String uriKey, ScriptObjectMirror som) {
@@ -728,16 +721,21 @@ public class PokerFace {
 		final JavaScriptEndPoint retVal = new JavaScriptEndPoint(uriKey, obj);
 		
 		try {
-			obj.callMember("setup", uriKey, scriptConfig, new SetupCompleteCallback() {
-				@Override
-				public void setupComplete() {
-					cb.setupComplete(retVal);
-				}
-				@Override
-				public void setupFailed(String msg) {
-					cb.setupFailed(f, msg, null);
-				}
-			}, ScriptHelper.ScriptLogger);
+			if (obj.hasMember("setup")) {
+				obj.callMember("setup", uriKey, scriptConfig, ScriptHelper.ScriptLogger, new SetupCompleteCallback() {
+					@Override
+					public void setupComplete() {
+						cb.setupComplete(retVal);
+					}
+					@Override
+					public void setupFailed(String msg) {
+						cb.setupFailed(f, msg, null);
+					}
+				});
+			}
+			else {
+				cb.setupComplete(retVal);
+			}
 		}
 		catch (Throwable e) {
 			cb.setupFailed(f, "The script at " + f.toAbsolutePath().toString() + " did not expose the expected 'setup' method", e);
