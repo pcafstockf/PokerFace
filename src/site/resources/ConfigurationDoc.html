@@ -98,6 +98,7 @@ function loadXMLDoc(filename) {
 	} catch (err) {
 		 // Helping IE11
 	}
+	xhttp.overrideMimeType("text/xml");
 	xhttp.send("");
 	return xhttp.responseXML;
 }
@@ -106,7 +107,7 @@ function displayResult() {
 	var docDiv = document.getElementById("doc");
 	if (! docDiv)
 		return;
-	xml = loadXMLDoc("https://raw.githubusercontent.com/pcafstockf/PokerFace/master/src/main/resources/PokerFace_v1Config.xsd");
+	xml = loadXMLDoc("PokerFace_v1Config.xsd");
 	if (! xml) {
 		docDiv.innerText = "Unable to load XSD";
 		return;

@@ -33,7 +33,7 @@ The flow of the `processRequest` method is as follows:
 1. Checks to see if there is a static file matching the request uri.
 2. If there is a matching static file, a [RequestForFileConsumer](apidocs/com/bytelightning/opensource/pokerface/RequestForFileConsumer.html) is returned.
 3. Checks to see if any script endpoint matches the browser request.
-	* Please see the 'inspectRequest()' method in the [EndpointTemplate.js](https://raw.githubusercontent.com/pcafstockf/PokerFace/master/Samples/ScriptRoot/EndpointTemplate.js) file for further documentation.
+	* Please see the 'inspectRequest()' method in the [EndpointTemplate.js](http://pcafstockf.github.io/PokerFace/EndpointTemplate.js.html) file for further documentation.
 4. If the script wished to handle the request, a [RequestForScriptConsumer](apidocs/com/bytelightning/opensource/pokerface/RequestForScriptConsumer.html) is returned.
 5. The request (possibly modified by the script) is matched against configured proxy [TargetDescriptor](#TargetDescriptor)s
 	* If a configured `TargetDescriptor` is **not** found **and** the redirect request came from the script endpoint, then **IF** the `dynamicHostMap` option is set to true, a proxy `TargetDescriptor` will be created on the fly.

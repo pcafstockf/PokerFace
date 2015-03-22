@@ -44,7 +44,7 @@ You may notice the # (anchor) on the 'old-and-busted' remote target.  This tells
 
 Remember, this DocumentRoot challenge is faced by all reverse proxies. Fortunately, there are solutions:
 
-* Ensure your html uses relative paths to child resources.  For example, http://old-and-busted.mydomain.com/corp/bar/foo.html's link would need to be to ./assets/my.css instead of /assets/my.css.  Be careful with this approach though.  ../assets/my.css will put you right back in the same 404 response boat.
+* Ensure your html uses relative paths to child resources.  For example, the "http://old-and-busted.mydomain.com/corp/bar/foo.html" link would need to be to ./assets/my.css instead of /assets/my.css.  Be careful with this approach though.  ../assets/my.css will put you right back in the same 404 response boat.
 * The simplest solution is to add an additional target to the configuration such as:
 ` -target "/assets/*=http://old-and-busted.mydomain.com/assets" `
 
