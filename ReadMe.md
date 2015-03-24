@@ -10,16 +10,16 @@ PokerFace is small (e.g. easy to audit), extremely fast, portable, and built on 
 
 Here are some short guides focused on specific objectives to help you get started.
 
-* [Reverse proxy to one or more remote servers](./reverseproxy.html).
-* [Serve local files and/or cache remote resources](./fileserver.html).
-* [Create web pages and services using JavaScript](./servletscripting.html).
-* [A/B testing using JavaScript](./abscripting.html).
-* [Using log4j or other logging frameworks](./loggingconfig.html).
-* [Https configuration and SSL bridging](./httpsconfig.html).
+* [Reverse proxy to one or more remote servers](http://pcafstockf.github.io/PokerFace/reverseproxy.html).
+* [Serve local files and/or cache remote resources](http://pcafstockf.github.io/PokerFace/fileserver.html).
+* [Create web pages and services using JavaScript](http://pcafstockf.github.io/PokerFace/servletscripting.html).
+* [A/B testing using JavaScript](http://pcafstockf.github.io/PokerFace/abscripting.html).
+* [Using log4j or other logging frameworks](http://pcafstockf.github.io/PokerFace/loggingconfig.html).
+* [Https configuration and SSL bridging](http://pcafstockf.github.io/PokerFace/httpsconfig.html).
 
 ###Command line options
-Simple / common scenarios can be easily configured via [the command line](./cmdlineopts.html).  
-More complex scenarios are configured via an [XML configuration file](./configfile.html).  
+Simple / common scenarios can be easily configured via [the command line](http://pcafstockf.github.io/PokerFace/cmdlineopts.html).  
+More complex scenarios are configured via an [XML configuration file](http://pcafstockf.github.io/PokerFace/configfile.html).  
 
 ###Site
 The web site and user documentation can be found [here](http://pcafstockf.github.io/PokerFace/index.html).
