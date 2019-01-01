@@ -24,11 +24,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.AbstractHttpEntity;
@@ -38,33 +35,36 @@ import org.apache.http.nio.IOControl;
 import org.apache.http.nio.entity.EntityAsyncContentProducer;
 import org.apache.http.nio.entity.HttpAsyncContentProducer;
 import org.apache.http.nio.entity.NStringEntity;
-import org.apache.http.nio.entity.ProducingNHttpEntity;
 import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Concrete implementation of org.apache.http.HttpEntity which obtains it's content from a JavaScript function.
  * The primary purpose of this class is to allow a script to start sending the headers of a response back to a client while it is busy building the actual content.
  */
-@SuppressWarnings({"deprecation", "restriction"})
-public class NJavascriptFunctionEntity extends AbstractHttpEntity implements HttpAsyncContentProducer, ProducingNHttpEntity {
+@SuppressWarnings({"restriction", "WeakerAccess"})
+public class NJavascriptFunctionEntity extends AbstractHttpEntity implements HttpAsyncContentProducer {
 	protected static final Logger Logger = LoggerFactory.getLogger(NJavascriptFunctionEntity.class.getPackage().getName());
 
 	/**
 	 * Primary constructor
 	 */
 	public NJavascriptFunctionEntity(String endpointUriStr, ScriptObjectMirror endPoint, ScriptObjectMirror fn, ContentType contentType, HttpResponse response, HttpContext context) {
-        setContentType(contentType.toString());
-        this.endpointUriStr = endpointUriStr;
-        this.endPoint = endPoint;
-        this.fn = fn;
-        this.contentType = contentType;
-        this.response = response;
-        this.context = context;
+		setContentType(contentType.toString());
+		this.endpointUriStr = endpointUriStr;
+		this.endPoint = endPoint;
+		this.fn = fn;
+		this.contentType = contentType;
+		this.response = response;
+		this.context = context;
 	}
+
 	private final String endpointUriStr;
 	private final ScriptObjectMirror endPoint;
 	private final ScriptObjectMirror fn;
@@ -72,71 +72,42 @@ public class NJavascriptFunctionEntity extends AbstractHttpEntity implements Htt
 	private final HttpResponse response;
 	private final HttpContext context;
 	private HttpEntity delegate;
-	
-	/**
-	 * {@inheritDoc}
-	 */
+
 	@Override
 	public boolean isRepeatable() {
 		return false;
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
+
 	@Override
 	public void close() throws IOException {
 		if (delegate instanceof Closeable)
-			((Closeable)delegate).close();
+			((Closeable) delegate).close();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void finish() throws IOException {
-        close();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean isStreaming() {
 		ensureDelegate();
 		return delegate.isStreaming();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public long getContentLength() {
 		ensureDelegate();
 		return delegate.getContentLength();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public InputStream getContent() throws IOException, IllegalStateException {
 		ensureDelegate();
 		return delegate.getContent();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void writeTo(OutputStream outstream) throws IOException {
 		ensureDelegate();
 		delegate.writeTo(outstream);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void produceContent(ContentEncoder encoder, IOControl ioctrl) throws IOException {
 		HttpAsyncContentProducer cp = getContentPoducer();
@@ -158,16 +129,18 @@ public class NJavascriptFunctionEntity extends AbstractHttpEntity implements Htt
 			}
 		}
 	}
+
 	/**
-	 * Wrap our delegate in an <code>HttpAsyncContentProducer</code>
+	 * Wrap our delegate in an {@code HttpAsyncContentProducer}
 	 */
-	private HttpAsyncContentProducer getContentPoducer() throws IOException {
+	private HttpAsyncContentProducer getContentPoducer() {
 		ensureDelegate();
 		if (delegate instanceof HttpAsyncContentProducer)
-			return (HttpAsyncContentProducer)delegate;
+			return (HttpAsyncContentProducer) delegate;
 		if (contentProducer == null)
 			contentProducer = new EntityAsyncContentProducer(delegate);
 		return contentProducer;
 	}
+
 	private HttpAsyncContentProducer contentProducer;
 }

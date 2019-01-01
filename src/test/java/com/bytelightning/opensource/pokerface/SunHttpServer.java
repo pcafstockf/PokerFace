@@ -24,33 +24,29 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
+
+import com.sun.net.httpserver.*;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLParameters;
-
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpsConfigurator;
-import com.sun.net.httpserver.HttpsParameters;
-import com.sun.net.httpserver.HttpsServer;
 
 /**
  * Basic wrapper around the sun http server that one can always count on being present in a jdk.
- * @see http://docs.oracle.com/javase/6/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver/HttpServer.html
+ *
+ * @see <a href="http://docs.oracle.com/javase/6/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver/HttpServer.html">com/sun/net/httpserver/HttpServer.html</a>
  */
-@SuppressWarnings("restriction")
+@SuppressWarnings({"restriction", "WeakerAccess"})
 public class SunHttpServer {
 	/**
 	 * Create a com.sun.net.httpserver (HttpServer or HttpsServer) at the indicated local address.
-	 * 
-	 * @param addr The address the server should listen on.
+	 *
+	 * @param addr   The address the server should listen on.
 	 * @param sslCtx If non-null, create an https server (@see CreateDefaultSSLContext). Otherwise a plain http server.
 	 */
 	public SunHttpServer(InetSocketAddress addr, SSLContext sslCtx) throws IOException {
@@ -67,25 +63,24 @@ public class SunHttpServer {
 		else
 			httpServer = HttpServer.create(addr, 100);
 	}
+
 	private HttpServer httpServer;
 
 	/**
 	 * Serve multiple requests at once
 	 */
-	private ExecutorService httpThreadPool = Executors.newCachedThreadPool(new ThreadFactory() {
-		public Thread newThread(Runnable r) {
-			Thread t = new Thread(r, "Remote Target Thread");
-			t.setDaemon(true);
-			return t;
-		}
+	private ExecutorService httpThreadPool = Executors.newCachedThreadPool(r -> {
+		Thread t = new Thread(r, "Remote Target Thread");
+		t.setDaemon(true);
+		return t;
 	});
 
 	/**
 	 * Register a handler for all (root) requests, and start the server.
-	 * 
+	 *
 	 * @param rootHandler Will receive all incoming requests.
 	 */
-	public void start(HttpHandler rootHandler) throws IOException {
+	public void start(HttpHandler rootHandler) {
 		// Hang everything off the root context.
 		httpServer.createContext("/", rootHandler);
 		// Set the ability to handle multiple requests at once
@@ -96,10 +91,11 @@ public class SunHttpServer {
 
 	/**
 	 * Register handlers for a set of uri path's, and start the server.
-	 * 
-	 * @param handlers A <code>Map</code> of uri path strings to HttpHandler's.
+	 *
+	 * @param handlers A {@code Map} of uri path strings to HttpHandler's.
 	 */
-	public void start(Map<String, HttpHandler> handlers) throws IOException {
+	@SuppressWarnings("unused")
+	public void start(Map<String, HttpHandler> handlers) {
 		for (Entry<String, HttpHandler> e : handlers.entrySet())
 			httpServer.createContext(e.getKey(), e.getValue());
 		// Set the ability to handle multiple requests at once

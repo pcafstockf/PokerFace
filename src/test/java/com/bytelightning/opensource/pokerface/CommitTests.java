@@ -24,11 +24,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
+
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ ConfigValidationTest.class, HelloWorldScriptTest.class, NashornCompiledScriptTest.class, ProxySpecificTest.class })
+@SuiteClasses({ConfigValidationTest.class, HelloWorldScriptTest.class, NashornCompiledScriptTest.class, ProxySpecificTest.class})
 public class CommitTests {
 }

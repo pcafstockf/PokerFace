@@ -24,27 +24,30 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-import java.util.HashSet;
-import java.util.Set;
 
 import org.apache.http.Header;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.message.BasicHeader;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Simple base class to assist with common tasks for a proxy (such as header manipulation)
  */
+@SuppressWarnings("WeakerAccess")
 public abstract class TargetBase {
 	protected static final Header Via = new BasicHeader("Via", "PokerFace/" + Utils.Version);
 
 	/**
 	 * Build a *lowercase* list of headers that should be removed.
 	 * Primarily the list comes from the 'Connection' header (http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.10)
-	 * @param connectionHeader	The value of the 'Connection' header (may be null).
-	 * @param names	An additional list of header names that should be added to the returned list.
+	 *
+	 * @param connectionHeader The value of the 'Connection' header (may be null).
+	 * @param names            An additional list of header names that should be added to the returned list.
 	 */
-	protected static Set<String> BuildHeaderRemovalList(Header connectionHeader, String ... names) {
-		HashSet<String> retVal = new HashSet<String>();
+	protected static Set<String> BuildHeaderRemovalList(Header connectionHeader, String... names) {
+		HashSet<String> retVal = new HashSet<>();
 		// Add any headers specified by the Connection header 
 		if (connectionHeader != null) {
 			retVal.add("connection");
@@ -61,11 +64,12 @@ public abstract class TargetBase {
 				retVal.add(name.toLowerCase().trim());
 		return retVal;
 	}
-	
+
 	/**
 	 * Create an appropriate http 'Via' header as specified in (http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45)
-	 * @param curViaHeader	The existing 'Via' header (may be null).
-	 * @param protocolVersion	The version of this specific http transaction.
+	 *
+	 * @param curViaHeader    The existing 'Via' header (may be null).
+	 * @param protocolVersion The version of this specific http transaction.
 	 */
 	protected static Header CreateHttpViaHeader(Header curViaHeader, ProtocolVersion protocolVersion) {
 		if (curViaHeader == null)

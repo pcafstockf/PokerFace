@@ -24,32 +24,30 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
+
+import org.junit.*;
+import org.xml.sax.SAXException;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
-
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.xml.sax.SAXException;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 
 /**
  * Sanity check to make sure our sample and test config's all stay in synch with our schema
  */
 public class ConfigValidationTest {
 
+	@SuppressWarnings("RedundantThrows")
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 	}
 
+	@SuppressWarnings("RedundantThrows")
 	@Before
 	public void setUp() throws Exception {
 	}
@@ -84,10 +82,12 @@ public class ConfigValidationTest {
 		validator.validate(new StreamSource(config));
 	}
 
+	@SuppressWarnings("RedundantThrows")
 	@After
 	public void tearDown() throws Exception {
 	}
 
+	@SuppressWarnings("RedundantThrows")
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 	}

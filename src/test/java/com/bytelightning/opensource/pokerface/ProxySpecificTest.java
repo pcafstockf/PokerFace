@@ -24,6 +24,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
+
+import com.sun.net.httpserver.Headers;
+import com.sun.net.httpserver.HttpExchange;
+import org.apache.commons.configuration.XMLConfiguration;
+import org.junit.*;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -32,24 +38,13 @@ import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
-
-import org.apache.commons.configuration.XMLConfiguration;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.sun.net.httpserver.Headers;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 
 /**
  * Setup a remote target (SunHttpServer), configure PokerFace to proxy to it, and use an HttpUrlConnection to validate that PokerFace injects the proper headers
  */
-@SuppressWarnings("restriction")
+@SuppressWarnings({"restriction", "WeakerAccess"})
 public class ProxySpecificTest {
 
 	/**
@@ -58,23 +53,19 @@ public class ProxySpecificTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		RemoteTarget = new SunHttpServer(new InetSocketAddress(InetAddress.getLoopbackAddress(), 8088), null);
-		RemoteTarget.start(new HttpHandler() {
-			@Override
-			public void handle(HttpExchange exchange) throws IOException {
-				OnRemoteTargetRequest(exchange);
-			}
-		});
+		RemoteTarget.start(ProxySpecificTest::OnRemoteTargetRequest);
 		proxy = new PokerFace();
 		XMLConfiguration conf = new XMLConfiguration();
 		conf.load(ProxySpecificTest.class.getResource("/ProxySpecificTestConfig.xml"));
 		proxy.config(conf);
 		boolean started = proxy.start();
 		Assert.assertTrue("Successful proxy start", started);
-		
+
 	}
+
 	private static SunHttpServer RemoteTarget;
 	private static PokerFace proxy;
-	
+
 	/**
 	 * Context handler for the SunHttpServer
 	 */
@@ -85,14 +76,14 @@ public class ProxySpecificTest {
 		try {
 			exchange.sendResponseHeaders(200, 0);
 			OutputStream out = exchange.getResponseBody();
-			out.write("<htm><head><title>TEST</title></head><body>TEST</body></html>".getBytes("utf-8"));
+			out.write("<htm><head><title>TEST</title></head><body>TEST</body></html>".getBytes(StandardCharsets.UTF_8));
 			out.close();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			Assert.fail(e.getMessage());
 		}
 	}
-	
+
+	@SuppressWarnings("RedundantThrows")
 	@Before
 	public void setUp() throws Exception {
 	}
@@ -107,17 +98,19 @@ public class ProxySpecificTest {
 		// optional default is GET
 		con.setRequestMethod("GET");
 		int responseCode = con.getResponseCode();
-		Assert.assertEquals("Valid reponse code", 200,  responseCode);
+		Assert.assertEquals("Valid reponse code", 200, responseCode);
 		String hdrField = con.getHeaderField("Via");
 		Assert.assertNotNull("Received a 'via' header", hdrField);
 		Assert.assertEquals("Received a valid 'via' header", "HTTP/1.1 PokerFace/" + Utils.Version, hdrField);
-		
+
 		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+		//noinspection StatementWithEmptyBody
 		while (in.readLine() != null)
 			;
 		in.close();
 	}
 
+	@SuppressWarnings("RedundantThrows")
 	@After
 	public void tearDown() throws Exception {
 	}

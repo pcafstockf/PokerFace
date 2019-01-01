@@ -25,30 +25,6 @@ package com.bytelightning.opensource.pokerface;
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
  */
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.ByteBuffer;
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.http.Header;
@@ -58,20 +34,27 @@ import org.apache.http.nio.NHttpServerConnection;
 import org.apache.http.nio.reactor.ssl.SSLIOSession;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpCoreContext;
-
 import sun.net.www.MimeEntry;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.*;
+import java.nio.ByteBuffer;
+import java.text.DateFormat;
+import java.util.*;
+
 /**
- * Implementation of <code>ScriptHelper</code>
+ * Implementation of {@code ScriptHelper}
  */
-@SuppressWarnings("restriction")
+@SuppressWarnings({"restriction", "WeakerAccess"})
 public class ScriptHelperImpl implements ScriptHelper, Closeable {
 	/**
 	 * Primary constructor
-	 * 
-	 * @param request Request as it was received from the client
-	 * @param context The context of this http transaction
-	 * @param bufferPool A pool from which <code>ByteBuffer</code>s can be obtained.
+	 *
+	 * @param request    Request as it was received from the client
+	 * @param context    The context of this http transaction
+	 * @param bufferPool A pool from which {@code ByteBuffer}s can be obtained.
 	 */
 	public ScriptHelperImpl(HttpRequest request, HttpContext context, ObjectPool<ByteBuffer> bufferPool) {
 		this.request = request;
@@ -92,8 +75,7 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 			for (ByteBuffer buffer : borrowedBuffers) {
 				try {
 					bufferPool.returnObject(buffer);
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					ScriptResponseProducer.Logger.error("Unable to return ByteBuffer to pool", e);
 				}
 			}
@@ -102,28 +84,22 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public ByteBuffer createBuffer() {
 		ByteBuffer buffer;
 		try {
 			buffer = bufferPool.borrowObject();
 			if (borrowedBuffers == null)
-				borrowedBuffers = new ArrayList<ByteBuffer>();
+				borrowedBuffers = new ArrayList<>();
 			borrowedBuffers.add(buffer);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			buffer = ByteBuffer.allocateDirect(1024 * 1024);
 		}
 		return buffer;
 	}
+
 	private List<ByteBuffer> borrowedBuffers;
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getScheme() {
 		// Note that we are getting the connection context, not our own httpcontext
@@ -132,13 +108,10 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 		return "https";
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String makeAbsoluteUrl(String location) {
 		if (location == null)
-			return location;
+			return null;
 		StringBuffer sb = new StringBuffer();
 		boolean leadingSlash = location.startsWith("/");
 
@@ -173,11 +146,8 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 				sb.append(location, 0, location.length());
 
 				sb = new StringBuffer(NormalizeURL(sb.toString()));
-			}
-			catch (IOException e) {
-				IllegalArgumentException iae = new IllegalArgumentException(location);
-				iae.initCause(e);
-				throw iae;
+			} catch (IOException e) {
+				throw new IllegalArgumentException(location, e);
 			}
 
 			return sb.toString();
@@ -187,17 +157,14 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 			return location;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String[] getAcceptableLocales() {
-		ArrayList<String> retVal = new ArrayList<String>();
+		ArrayList<String> retVal = new ArrayList<>();
 		Header[] hdrs = request.getHeaders("Accept-Language");
 		if ((hdrs != null) && (hdrs.length > 0)) {
 			// Store the accumulated languages that have been requested in a local collection, sorted by the quality value (so we can add Locales in descending order).
 			// The values will be ArrayLists containing the corresponding Locales to be added
-			TreeMap<Double, ArrayList<Locale>> locales = new TreeMap<Double, ArrayList<Locale>>();
+			TreeMap<Double, ArrayList<Locale>> locales = new TreeMap<>();
 			for (Header hdr : hdrs)
 				parseLocalesHeader(hdr.getValue(), locales);
 			// Process the quality values in highest->lowest order (due to negating the Double value when creating the key)
@@ -207,7 +174,7 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 			Collections.reverse(retVal);
 		}
 		retVal.add(Locale.getDefault().toLanguageTag());
-		return retVal.toArray(new String[retVal.size()]);
+		return retVal.toArray(new String[0]);
 	}
 
 	/**
@@ -218,7 +185,7 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 			String[] arr = str.trim().replace("-", "_").split(";");
 
 			// Parse the q-value
-			Double q = 1.0d;
+			double q = 1.0d;
 			for (String s : arr) {
 				s = s.trim();
 				if (s.startsWith("q=")) {
@@ -228,8 +195,7 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 							q = Math.rint(Double.parseDouble(ds) * 10000d) / 10000d;
 						else
 							q = 0d;
-					}
-					catch (NumberFormatException e) {
+					} catch (NumberFormatException e) {
 						q = 0.0;
 					}
 					break;
@@ -250,34 +216,26 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 						locale = new Locale(l[0]);
 						break;
 				}
-				ArrayList<Locale> list = locales.get(q);
-				if (list == null) {
-					list = new ArrayList<Locale>();
-					locales.put(q, list);
-				}
+				ArrayList<Locale> list = locales.computeIfAbsent(q, k -> new ArrayList<>());
 				list.add(locale);
 			}
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public MimeEntry findMimeEntryByType(String mimeType) {
 		return MimeTypeMap.get(mimeType);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public MimeEntry findMimeEntryByExt(String ext) {
 		return MimeExtensionsMap.get(ext);
 	}
+
 	protected static final HashMap<String, MimeEntry> MimeTypeMap;
 	protected static final HashMap<String, MimeEntry> MimeExtensionsMap;
 	private static final sun.net.www.MimeTable MimeHashTable;
+
 	static {
 		MimeHashTable = sun.net.www.MimeTable.getDefaultTable();
 		AddMimeEntryImpl("text/css", ".css");
@@ -290,31 +248,32 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 		AddMimeEntryImpl("image/x-icon", ".ico");
 		AddMimeEntryImpl("image/svg+xml", ".svg,.svgz");
 		AddMimeEntryImpl("application/font-woff", ".woff");// http://www.iana.org/assignments/media-types/application/font-woff
-		AddMimeEntryImpl("application/font-sfnt", ".otf,.ttf");	// http://www.iana.org/assignments/media-types/application/font-sfnt
+		AddMimeEntryImpl("application/font-sfnt", ".otf,.ttf");    // http://www.iana.org/assignments/media-types/application/font-sfnt
 		AddMimeEntryImpl("application/vnd.ms-fontobject", ".eot");
-		MimeTypeMap = new HashMap<String, MimeEntry>(MimeHashTable.getSize() * 2, 0.25f);
-		MimeExtensionsMap = new HashMap<String, MimeEntry>(MimeHashTable.getSize() * 2, 0.25f);
+		MimeTypeMap = new HashMap<>(MimeHashTable.getSize() * 2, 0.25f);
+		MimeExtensionsMap = new HashMap<>(MimeHashTable.getSize() * 2, 0.25f);
 		RebuildMimeMaps();
 	}
-	
+
 	/**
 	 * Add a mime entry to the table.
 	 * If the type already exists, the 'extensions' will be added, otherwise a new type will be added with the specified extensions.
-	 * @param type	Mime formatted type
-	 * @param extensions	Comma separated list of dot (.) prefixed extensions.
+	 *
+	 * @param type       Mime formatted type
+	 * @param extensions Comma separated list of dot (.) prefixed extensions.
 	 * @throws RuntimeException If the extensions string is not properly formatted (see parameters).
 	 */
 	protected static void AddMimeEntry(String type, String extensions) {
 		AddMimeEntryImpl(type, extensions);
 		RebuildMimeMaps();
 	}
-	
+
 	/**
-	 * <code>Hashtable</code> is synchronized, and there is no need for us to suffer that slow down.
-	 * This method rebuilds two <code>HashMap</code>s that we use to lookup <code>MimeEntry</code>s with.
+	 * {@code Hashtable} is synchronized, and there is no need for us to suffer that slow down.
+	 * This method rebuilds two {@code HashMap}s that we use to lookup {@code MimeEntry}s with.
 	 */
 	private static void RebuildMimeMaps() {
-		synchronized(MimeHashTable) {
+		synchronized (MimeHashTable) {
 			MimeTypeMap.clear();
 			MimeExtensionsMap.clear();
 			Enumeration<MimeEntry> elems = MimeHashTable.elements();
@@ -330,22 +289,21 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 	}
 
 	/**
-	 * @see AddMimeEntry
+	 * @see #AddMimeEntry(String, String) AddMimeEntry
 	 */
 	private static void AddMimeEntryImpl(String type, String extensions) {
-		LinkedHashSet<String> extSet = new LinkedHashSet<String>();
+		LinkedHashSet<String> extSet = new LinkedHashSet<>();
 		MimeEntry entry = MimeHashTable.find(type);
 		if (entry == null)
-			entry = new sun.net.www.MimeEntry(type.intern());
+			entry = new MimeEntry(type.intern());
 		// Ensure the type is an interned string
 		entry.setType(type.intern());
-		
+
 		String[] existing = entry.getExtensions();
 		if (existing != null)
-			for (String ext : existing)
-				extSet.add(ext);
+			extSet.addAll(Arrays.asList(existing));
 		String[] additional = extensions.split(",");
-		for (int i=0; i<additional.length; i++) {
+		for (int i = 0; i < additional.length; i++) {
 			additional[i] = additional[i].trim().toLowerCase();
 			if (additional[i].length() == 0)
 				throw new RuntimeException("Invalid mime extensions for: " + type);
@@ -353,7 +311,7 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 				throw new RuntimeException("mime extensions must start with a '.' (" + type + ")");
 			extSet.add(additional[i]);
 		}
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (String ext : extSet) {
 			if (sb.length() > 0)
 				sb.append(',');
@@ -362,7 +320,7 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 		entry.setExtensions(sb.toString());
 		// This little hack ensures that the MimeEntry itself has interned strings in it's list.  Yes it's a trade off between bad practice and speed.
 		String[] processed = entry.getExtensions();
-		for (int i=0; i<processed.length; i++)
+		for (int i = 0; i < processed.length; i++)
 			processed[i] = processed[i].intern();
 	}
 
@@ -373,45 +331,30 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 		return (NHttpServerConnection) context.getAttribute(HttpCoreContext.HTTP_CONNECTION);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public InetAddress getLocalAddress() {
 		HttpInetConnection inetConn = (HttpInetConnection) getConnection();
 		return inetConn.getLocalAddress();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public int getLocalPort() {
 		HttpInetConnection inetConn = (HttpInetConnection) getConnection();
 		return inetConn.getLocalPort();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public InetAddress getRemoteAddress() {
 		HttpInetConnection inetConn = (HttpInetConnection) getConnection();
 		return inetConn.getRemoteAddress();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public int getRemotePort() {
 		HttpInetConnection inetConn = (HttpInetConnection) getConnection();
 		return inetConn.getRemotePort();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getHOSTName() {
 		String val = null;
@@ -426,9 +369,6 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 		return getLocalAddress().getHostName();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public int getHOSTPort() {
 		String val = null;
@@ -443,8 +383,7 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 					end = val.length();
 				try {
 					return Integer.parseInt(val.substring(pos + 1, end));
-				}
-				catch (Throwable t) {
+				} catch (Throwable t) {
 					// Ignore any possible error.
 				}
 			}
@@ -454,9 +393,6 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 		return 80;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getCharacterEncoding() {
 		Header hdr = request.getFirstHeader("Content-Type");
@@ -465,24 +401,18 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 		return "utf-8";
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public DateFormat getHTTPDateFormater() {
 		return Utils.GetHTTPDateFormater();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String formatDate(long millisecondsSinceEpoch) {
 		return Utils.GetHTTPDateFormater().format(new Date(millisecondsSinceEpoch));
 	}
 
 	/**
-	 * Determine if a URI string has a <code>scheme</code> component.
+	 * Determine if a URI string has a {@code scheme} component.
 	 */
 	public static boolean HasScheme(String uri) {
 		int len = uri.length();
@@ -498,15 +428,14 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 
 	/**
 	 * Percent-encode values according the RFC 3986. The built-in Java URLEncoder does not encode according to the RFC, so we make the extra replacements.
-	 * 
+	 *
 	 * @param string Decoded string.
 	 * @return Encoded string per RFC 3986.
 	 */
 	public static String PercentEncodeRfc3986(final String string) {
 		try {
 			return URLEncoder.encode(string, "UTF-8").replace("+", "%20").replace("*", "%2A").replace("%7E", "~");
-		}
-		catch (UnsupportedEncodingException e) {
+		} catch (UnsupportedEncodingException e) {
 			return string;
 		}
 	}
@@ -518,8 +447,7 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 		final URL url;
 		try {
 			url = new URI(taintedURL).normalize().toURL();
-		}
-		catch (URISyntaxException e) {
+		} catch (URISyntaxException e) {
 			throw new MalformedURLException(e.getMessage());
 		}
 
@@ -530,11 +458,7 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 
 		if (params != null) {
 			// Some params are only relevant for user tracking, so remove the most commons ones.
-			for (Iterator<String> i = params.keySet().iterator(); i.hasNext();) {
-				final String key = i.next();
-				if (key.startsWith("utm_") || key.contains("session"))
-					i.remove();
-			}
+			params.keySet().removeIf(key -> key.startsWith("utm_") || key.contains("session"));
 			queryString = "?" + Canonicalize(params);
 		}
 		else
@@ -545,14 +469,14 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 
 	/**
 	 * Takes a query string, separates the constituent name-value pairs, and stores them in a SortedMap ordered by lexicographical order.
-	 * 
+	 *
 	 * @return Null if there is no query string.
 	 */
 	private static SortedMap<String, String> CreateParameterMap(final String queryString) {
 		if (queryString == null || queryString.isEmpty())
 			return null;
 		final String[] pairs = queryString.split("&");
-		final Map<String, String> params = new HashMap<String, String>(pairs.length);
+		final Map<String, String> params = new HashMap<>(pairs.length);
 		for (final String pair : pairs) {
 			if (pair.length() < 1)
 				continue;
@@ -560,8 +484,7 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 			for (int j = 0; j < tokens.length; j++) {
 				try {
 					tokens[j] = URLDecoder.decode(tokens[j], "UTF-8");
-				}
-				catch (UnsupportedEncodingException ex) {
+				} catch (UnsupportedEncodingException ex) {
 					ex.printStackTrace();
 				}
 			}
@@ -580,19 +503,19 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 					break;
 			}
 		}
-		return new TreeMap<String, String>(params);
+		return new TreeMap<>(params);
 	}
 
 	/**
 	 * Canonicalize the query string.
-	 * 
+	 *
 	 * @param sortedParamMap Parameter name-value pairs in lexicographical order.
 	 * @return Canonical form of query string.
 	 */
 	private static String Canonicalize(final SortedMap<String, String> sortedParamMap) {
 		if (sortedParamMap == null || sortedParamMap.isEmpty())
 			return "";
-		final StringBuffer sb = new StringBuffer(350);
+		final StringBuilder sb = new StringBuilder(350);
 		final Iterator<Map.Entry<String, String>> iter = sortedParamMap.entrySet().iterator();
 		while (iter.hasNext()) {
 			final Map.Entry<String, String> pair = iter.next();
@@ -606,9 +529,9 @@ public class ScriptHelperImpl implements ScriptHelper, Closeable {
 	}
 
 	/**
-	 * Parse the character encoding from the specified content type header. 
-	 * If the content type is null, or there is no explicit character encoding, <code>null</code> is returned.
-	 * 
+	 * Parse the character encoding from the specified content type header.
+	 * If the content type is null, or there is no explicit character encoding, {@code null} is returned.
+	 *
 	 * @param contentType a content type header
 	 */
 	public static String GetCharsetFromContentType(String contentType) {

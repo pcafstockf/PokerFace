@@ -24,6 +24,22 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
+
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import org.apache.commons.pool2.ObjectPool;
+import org.apache.http.*;
+import org.apache.http.impl.nio.pool.BasicNIOConnPool;
+import org.apache.http.message.BasicHttpEntityEnclosingRequest;
+import org.apache.http.message.BasicHttpRequest;
+import org.apache.http.nio.protocol.HttpAsyncExchange;
+import org.apache.http.nio.protocol.HttpAsyncRequestConsumer;
+import org.apache.http.nio.protocol.HttpAsyncRequestHandler;
+import org.apache.http.nio.protocol.HttpAsyncRequester;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -37,32 +53,12 @@ import java.util.NavigableMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
-
-import org.apache.commons.pool2.ObjectPool;
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpException;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.RequestLine;
-import org.apache.http.impl.nio.pool.BasicNIOConnPool;
-import org.apache.http.message.BasicHttpEntityEnclosingRequest;
-import org.apache.http.message.BasicHttpRequest;
-import org.apache.http.nio.protocol.HttpAsyncExchange;
-import org.apache.http.nio.protocol.HttpAsyncRequestConsumer;
-import org.apache.http.nio.protocol.HttpAsyncRequestHandler;
-import org.apache.http.nio.protocol.HttpAsyncRequester;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
- * Analyzes each new request from a client (the content of which will not yet be fully received), 
- * checks for a matching JavaScript endpoint and invokes it's <code>inspectRequest</code> method if it exist, 
+ * Analyzes each new request from a client (the content of which will not yet be fully received),
+ * checks for a matching JavaScript endpoint and invokes it's {@code inspectRequest} method if it exist,
  * analyzes the script response (and if appropriate delegates further processing to the script),
- * otherwise resolves the remote Target (if any), 
- * and finally creates either a <code>RequestForScriptConsumer</code> or a <code>RequestForTargetConsumer</code> to actually consume the request.
+ * otherwise resolves the remote Target (if any),
+ * and finally creates either a {@code RequestForScriptConsumer} or a {@code RequestForTargetConsumer} to actually consume the request.
  * NOTE: This is a singleton (not one per transaction as is the case for the Producers and Consumers).
  */
 @SuppressWarnings("restriction")
@@ -71,15 +67,14 @@ public class RequestHandler implements HttpAsyncRequestHandler<ResponseProducer>
 
 	/**
 	 * Primary constructor.
-	 * @param executor	<code>HttpAsyncRequester</code> which will perform the actual request to the remote Target and receive it's response.
-	 * @param connPool	The client connection pool that will be used by the <code>executor</code>
-	 * @param patternTargetMapping	The mapping of relative uri paths to configured Targets.
-	 * @param scripts	Mapping of all JavaScript endpoints.  This map *may* be dynamically updated, or it may be null to reflect that JavaScript endpoints are not configured.
-	 * @param dynamicHostMap	If non-null, we will allow JavaScript endpoints to proxy to remote Target's not specified in the configuration file.
+	 *
+	 * @param executor             {@code HttpAsyncRequester} which will perform the actual request to the remote Target and receive it's response.
+	 * @param connPool             The client connection pool that will be used by the {@code executor}
+	 * @param patternTargetMapping The mapping of relative uri paths to configured Targets.
+	 * @param scripts              Mapping of all JavaScript endpoints.  This map *may* be dynamically updated, or it may be null to reflect that JavaScript endpoints are not configured.
+	 * @param dynamicHostMap       If non-null, we will allow JavaScript endpoints to proxy to remote Target's not specified in the configuration file.
 	 */
-	public RequestHandler(HttpAsyncRequester executor, BasicNIOConnPool connPool, ObjectPool<ByteBuffer> bufferPool, 
-					Path staticFilesPath, Map<String, TargetDescriptor> patternTargetMapping, NavigableMap<String, ScriptObjectMirror> scripts,
-					ConcurrentMap<String, HttpHost> dynamicHostMap) {
+	public RequestHandler(HttpAsyncRequester executor, BasicNIOConnPool connPool, ObjectPool<ByteBuffer> bufferPool, Path staticFilesPath, Map<String, TargetDescriptor> patternTargetMapping, NavigableMap<String, ScriptObjectMirror> scripts, ConcurrentMap<String, HttpHost> dynamicHostMap) {
 		this.executor = executor;
 		this.connPool = connPool;
 		this.bufferPool = bufferPool;
@@ -89,6 +84,7 @@ public class RequestHandler implements HttpAsyncRequestHandler<ResponseProducer>
 		this.dynamicHostMap = dynamicHostMap;
 		this.idCounter = new AtomicLong(1);
 	}
+
 	private final BasicNIOConnPool connPool;
 	private final HttpAsyncRequester executor;
 	private final ObjectPool<ByteBuffer> bufferPool;
@@ -97,13 +93,13 @@ public class RequestHandler implements HttpAsyncRequestHandler<ResponseProducer>
 	private final Map<String, TargetDescriptor> patternTargetMapping;
 	private final NavigableMap<String, ScriptObjectMirror> scripts;
 	private final AtomicLong idCounter;
-	
+
 	/**
 	 * {@inheritDoc}
 	 * Main entry point of a client request into this server.
 	 * This method creates a unique id for the request / response transaction, looks for a matching javascript endpoint (which if found is given an opportunity to inspect the request).
-	 * If an endpoint is found and it wishes to handle the request, an appropriate <code>HttpAsyncRequestConsumer<ResponseProducer></code> is returned to make that happen.
-	 * Otherwise the request (which may have been modified by the endpoint) is asynchronously sent off to a matching remote Target via <code>RequestForTargetConsumer</code>.
+	 * If an endpoint is found and it wishes to handle the request, an appropriate {@code HttpAsyncRequestConsumer<ResponseProducer>} is returned to make that happen.
+	 * Otherwise the request (which may have been modified by the endpoint) is asynchronously sent off to a matching remote Target via {@code RequestForTargetConsumer}.
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -119,7 +115,7 @@ public class RequestHandler implements HttpAsyncRequestHandler<ResponseProducer>
 		int queryPos = uriStr.lastIndexOf('?');
 		if (queryPos > 0)
 			uriStr = uriStr.substring(0, queryPos);
-		int anchorPos = uriStr.lastIndexOf('#');	// You could have an anchor without a query
+		int anchorPos = uriStr.lastIndexOf('#');    // You could have an anchor without a query
 		if (anchorPos > 0)
 			uriStr = uriStr.substring(0, anchorPos);
 		context.setAttribute("pokerface.uripath", uriStr);
@@ -132,16 +128,15 @@ public class RequestHandler implements HttpAsyncRequestHandler<ResponseProducer>
 					Path rsrcPath = staticFilesPath.resolve(uriStr.replaceAll("\\.\\./", "/").substring(1));
 					if (Files.exists(rsrcPath) && Files.isRegularFile(rsrcPath))
 						return new RequestForFileConsumer(context, rsrcPath.toFile());
-				}
-				catch (Exception ex) {
+				} catch (Exception ex) {
 					Logger.warn("Error resolving URI path", ex);
 				}
 			}
 		}
-		
+
 		BufferIOController requestBuffer = new BufferIOController(bufferPool);
 		BufferIOController responseBuffer = new BufferIOController(bufferPool);
-		
+
 		// If script endpoints are configured, look for the closest match (if any).
 		if (scripts != null) {
 			uriStr = uriStr.toLowerCase();
@@ -159,10 +154,10 @@ public class RequestHandler implements HttpAsyncRequestHandler<ResponseProducer>
 				scriptContext.setAttribute("pokerface.scriptHelper", new ScriptHelperImpl(request, context, bufferPool));
 				scriptContext.setAttribute("pokerface.endpoints", scripts);
 				scriptContext.setAttribute("pokerface.scriptLogger", ScriptHelper.ScriptLogger);
-//FIXME: Test out the recursively higher script selection.
-//FIXME: Add ignore of # directories (don't forget to update the file watcher to ignore them as well)
+				//FIXME: Test out the recursively higher script selection.
+				//FIXME: Add ignore of # directories (don't forget to update the file watcher to ignore them as well)
 				// Call recursively higher (closer to the root) scripts until one is interested.
-				Object scriptResult = null;
+				Object scriptResult;
 				while (true) {
 					sb.setLength(0);
 					sb.append(logPrefix);
@@ -177,14 +172,14 @@ public class RequestHandler implements HttpAsyncRequestHandler<ResponseProducer>
 					scriptResult = transformScriptInspectionResult(request, scriptResult);
 					if (scriptResult == null) {
 						if (uriStr.length() > 1) {
-							int lastSlash = uriStr.lastIndexOf('/', uriStr.length());
+							int lastSlash = uriStr.lastIndexOf('/');
 							if (lastSlash >= 0) {
-								uriStr = uriStr.substring(0, lastSlash + 1);	// Add a slash to see if there is a directory script
+								uriStr = uriStr.substring(0, lastSlash + 1);    // Add a slash to see if there is a directory script
 								entry = scripts.floorEntry(uriStr);
 								if ((entry != null) && uriStr.startsWith(entry.getKey()))
 									continue;
 								if (lastSlash > 0) {
-									uriStr = uriStr.substring(0, uriStr.length()-1);	// Drop the slash and try again.
+									uriStr = uriStr.substring(0, uriStr.length() - 1);    // Drop the slash and try again.
 									entry = scripts.floorEntry(uriStr);
 									if ((entry != null) && uriStr.startsWith(entry.getKey()))
 										continue;
@@ -198,7 +193,7 @@ public class RequestHandler implements HttpAsyncRequestHandler<ResponseProducer>
 				if (scriptResult != null) {
 					if (scriptResult instanceof HttpAsyncRequestConsumer<?>)
 						return (HttpAsyncRequestConsumer<ResponseProducer>) scriptResult;
-					else if ((scriptResult instanceof ScriptObjectMirror) && scriptEndpoint.equals(scriptResult))	// The script wants to handle the request itself.
+					else if ((scriptResult instanceof ScriptObjectMirror) && scriptEndpoint.equals(scriptResult))    // The script wants to handle the request itself.
 						return new RequestForScriptConsumer(scriptContext, requestBuffer, new ScriptResponseProducer(scriptEndpoint, request, scriptContext, responseBuffer));
 					else {
 						// The script wants to pass along a modified Request to the target
@@ -215,27 +210,26 @@ public class RequestHandler implements HttpAsyncRequestHandler<ResponseProducer>
 	}
 
 	/**
-	 * This method converts the response from a JavaScript endpoint's 'inspectRequest' method to one of null, <code>HttpRequest</code>, <code>HttpAsyncRequestConsumer<ResponseProducer></code>
-	 * @param originalRequest	The original request from the client
-	 * @param result	The result from the JavaScript endpoint's 'inspectRequest' method.
-	 * @return null, <code>HttpRequest</code>, <code>HttpAsyncRequestConsumer<ResponseProducer></code>
+	 * This method converts the response from a JavaScript endpoint's 'inspectRequest' method to one of null, {@code HttpRequest}, {@code HttpAsyncRequestConsumer<ResponseProducer>}
+	 *
+	 * @param originalRequest The original request from the client
+	 * @param result          The result from the JavaScript endpoint's 'inspectRequest' method.
+	 * @return null, {@code HttpRequest}, {@code HttpAsyncRequestConsumer<ResponseProducer>}
 	 */
-	@SuppressWarnings("unchecked")
 	private Object transformScriptInspectionResult(HttpRequest originalRequest, Object result) {
 		if (result == null)
 			return null;
 		if (result instanceof HttpRequest)
-			return (HttpRequest) result;
+			return result;
 		if (result instanceof HttpAsyncRequestConsumer<?>)
-			return (HttpAsyncRequestConsumer<ResponseProducer>) result;
+			return result;
 		if (result instanceof ScriptObjectMirror)
-			return (ScriptObjectMirror) result;
+			return result;
 
 		if (result instanceof URL) {
 			try {
 				result = ((URL) result).toURI();
-			}
-			catch (URISyntaxException ex) {
+			} catch (URISyntaxException ex) {
 				Logger.error("The endpoint at " + originalRequest.getRequestLine().getUri() + " returned an invalid URL instance", ex);
 				return null;
 			}
@@ -243,14 +237,13 @@ public class RequestHandler implements HttpAsyncRequestHandler<ResponseProducer>
 		else if (result instanceof String) {
 			try {
 				result = new URI((String) result);
-			}
-			catch (URISyntaxException ex) {
+			} catch (URISyntaxException ex) {
 				Logger.error("The endpoint at " + originalRequest.getRequestLine().getUri() + " returned an invalid URL String", ex);
 				return null;
 			}
 		}
 		if (result instanceof URI) {
-			String str = ((URI) result).toString();
+			String str = result.toString();
 			RequestLine origReqLine = originalRequest.getRequestLine();
 			if (originalRequest instanceof HttpEntityEnclosingRequest) {
 				BasicHttpEntityEnclosingRequest r = new BasicHttpEntityEnclosingRequest(origReqLine.getMethod(), str, origReqLine.getProtocolVersion());
@@ -268,13 +261,14 @@ public class RequestHandler implements HttpAsyncRequestHandler<ResponseProducer>
 
 	/**
 	 * {@inheritDoc}
-	 * Our <code>processRequest</code> method always returns an instance of <code>HttpAsyncRequestConsumer<ResponseProducer></code> and the <code>ResponseProducer<code> part of that is passed as the first parameter to this method.
-	 * This method simply arms the <code>HttpAsyncExchange</code> response trigger with our asynchronous <code>Producer</code>.
+	 * Our {@code processRequest} method always returns an instance of {@code HttpAsyncRequestConsumer<ResponseProducer>} and the {@code ResponseProducer} part of that is passed as the first parameter to this method.
+	 * This method simply arms the {@code HttpAsyncExchange} response trigger with our asynchronous {@code Producer}.
 	 */
+	@SuppressWarnings("RedundantThrows")
 	@Override
 	public void handle(ResponseProducer producer, HttpAsyncExchange responseTrigger, HttpContext context) throws HttpException, IOException {
 		if (producer.setTrigger(responseTrigger)) {
-			String id = (String)context.getAttribute("pokerface.txId");
+			String id = (String) context.getAttribute("pokerface.txId");
 			Logger.trace("[client<-proxy] " + id + " response triggered");
 		}
 	}

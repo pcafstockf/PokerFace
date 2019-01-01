@@ -24,6 +24,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
+
+import org.apache.commons.cli.*;
+import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration.resolver.DefaultEntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -32,27 +39,15 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.MissingOptionException;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
-import org.apache.commons.configuration.XMLConfiguration;
-import org.apache.commons.configuration.resolver.DefaultEntityResolver;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
 /**
- * Main entry point for PokerFace, this class analyzes various command line switches and builds up a configuration that it delegates to an instance of the <code>PokerFace<code> class to actually perform the configuration.
+ * Main entry point for PokerFace, this class analyzes various command line switches and builds up a configuration that it delegates to an instance of the {@code PokerFace} class to actually perform the configuration.
  */
 public class PokerFaceApp {
 	public static void main(String[] args) {
-	    if (JavaVersionAsFloat() < (1.8f - Float.MIN_VALUE)) {
-	    	System.err.println("PokerFace requires at least Java v8 to run.");
-	    	return;
-	    }
+		if (JavaVersionAsFloat() < (1.8f - Float.MIN_VALUE)) {
+			System.err.println("PokerFace requires at least Java v8 to run.");
+			return;
+		}
 		// Configure the command line options parser
 		Options options = new Options();
 		options.addOption("h", false, "help");
@@ -60,7 +55,7 @@ public class PokerFaceApp {
 		options.addOption("keystore", true, "Filepath for PokerFace certificate keystore.");
 		options.addOption("storepass", true, "The store password of the keystore.");
 		options.addOption("keypass", true, "The key password of the keystore.");
-		options.addOption("target", true, "Remote Target requestPattern=targetUri");	// NOTE: targetUri may contain user-info and if so will be interpreted as the alias of a cert to be presented to the remote target
+		options.addOption("target", true, "Remote Target requestPattern=targetUri");    // NOTE: targetUri may contain user-info and if so will be interpreted as the alias of a cert to be presented to the remote target
 		options.addOption("servercpu", true, "Number of cores the server should use.");
 		options.addOption("targetcpu", true, "Number of cores the http targets should use.");
 		options.addOption("trustany", false, "Ignore certificate identity errors from target servers.");
@@ -70,11 +65,11 @@ public class PokerFaceApp {
 		options.addOption("library", true, "JavaScript library to load into global context.");
 		options.addOption("watch", false, "Dynamically watch scripts directory for changes.");
 		options.addOption("dynamicTargetScripting", false, "WARNING! This option allows scripts to redirect requests to *any* other remote server.");
-		
-		CommandLine cmdLine = null;
+
+		CommandLine cmdLine;
 		// parse the command line.
 		try {
-			CommandLineParser parser = new PosixParser();
+			CommandLineParser parser = new DefaultParser();
 			cmdLine = parser.parse(options, args);
 			if (args.length == 0 || cmdLine.hasOption('h')) {
 				HelpFormatter formatter = new HelpFormatter();
@@ -82,18 +77,16 @@ public class PokerFaceApp {
 				formatter.printHelp(PokerFaceApp.class.getSimpleName(), options);
 				return;
 			}
-		}
-		catch (ParseException exp) {
+		} catch (ParseException exp) {
 			System.err.println("Parsing failed.  Reason: " + exp.getMessage());
 			return;
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			ex.printStackTrace(System.err);
 			return;
 		}
-		
+
 		XMLConfiguration config = new XMLConfiguration();
-		try {			
+		try {
 			if (cmdLine.hasOption("config")) {
 				Path tmp = Utils.MakePath(cmdLine.getOptionValue("config"));
 				if (!Files.exists(tmp))
@@ -112,19 +105,18 @@ public class PokerFaceApp {
 									entityURL = PokerFaceApp.class.getResource("/PokerFace_v1Config.xsd");
 								else
 									entityURL = new URL(systemId);
-				                URLConnection connection = entityURL.openConnection();
-				                connection.setUseCaches(false);
-				                InputStream stream = connection.getInputStream();
-				                retVal = new InputSource(stream);
-				                retVal.setSystemId(entityURL.toExternalForm());
-							}
-							catch (Throwable e) {
+								URLConnection connection = entityURL.openConnection();
+								connection.setUseCaches(false);
+								InputStream stream = connection.getInputStream();
+								retVal = new InputSource(stream);
+								retVal.setSystemId(entityURL.toExternalForm());
+							} catch (Throwable e) {
 								return retVal;
 							}
 						}
-		                return retVal;
+						return retVal;
 					}
-					
+
 				});
 				config.setSchemaValidation(true);
 				config.setURL(tmp.toUri().toURL());
@@ -145,7 +137,7 @@ public class PokerFaceApp {
 				serverStrs = cmdLine.getOptionValues("listen");
 				if (serverStrs == null)
 					throw new MissingOptionException("No listening addresses specified specified");
-				for (int i=0; i<serverStrs.length; i++) {
+				for (int i = 0; i < serverStrs.length; i++) {
 					String addrStr;
 					String alias = null;
 					String protocol = null;
@@ -156,7 +148,7 @@ public class PokerFaceApp {
 							throw new IllegalArgumentException("Invalid http argument.");
 						else if (addrPos + 1 >= serverStrs[i].length())
 							throw new IllegalArgumentException("Invalid http argument.");
-						addrStr = serverStrs[i].substring(addrPos+1, serverStrs[i].length());
+						addrStr = serverStrs[i].substring(addrPos + 1);
 						String[] types = serverStrs[i].substring(0, addrPos).split(",");
 						for (String type : types) {
 							if (type.equalsIgnoreCase("http"))
@@ -179,7 +171,7 @@ public class PokerFaceApp {
 					if (protocol != null)
 						config.addProperty("server.listen(" + i + ")[@protocol]", protocol);
 					if (https != null)
-						config.addProperty("server.listen(" + i + ")[@secure]", https);
+						config.addProperty("server.listen(" + i + ")[@secure]", true);
 				}
 				String servercpu = cmdLine.getOptionValue("servercpu");
 				if (servercpu != null)
@@ -197,7 +189,7 @@ public class PokerFaceApp {
 						throw new FileNotFoundException("'files' path is not a directory.");
 					config.setProperty("files.rootDirectory", tmp.toAbsolutePath().toUri());
 				}
-				
+
 				// Configure scripting
 				if (cmdLine.hasOption("scripts")) {
 					Path tmp = Utils.MakePath(cmdLine.getOptionValue("scripts"));
@@ -209,7 +201,7 @@ public class PokerFaceApp {
 					config.setProperty("scripts.dynamicWatch", cmdLine.hasOption("watch"));
 					String[] libraries = cmdLine.getOptionValues("library");
 					if (libraries != null) {
-						for (int i=0; i<libraries.length; i++) {
+						for (int i = 0; i < libraries.length; i++) {
 							Path lib = Utils.MakePath(libraries[i]);
 							if (!Files.exists(lib))
 								throw new FileNotFoundException("Script library does not exist [" + libraries[i] + "].");
@@ -224,7 +216,7 @@ public class PokerFaceApp {
 				else if (cmdLine.hasOption("library"))
 					System.out.println("IGNORING 'library' option as no 'scripts' directory was specified.");
 			}
-			String keyStorePath = cmdLine.getOptionValue("keystore");			
+			String keyStorePath = cmdLine.getOptionValue("keystore");
 			if (keyStorePath != null)
 				config.setProperty("keystore", keyStorePath);
 			String keypass = cmdLine.getOptionValue("keypass");
@@ -235,25 +227,25 @@ public class PokerFaceApp {
 				config.setProperty("storepass", keypass);
 			if (cmdLine.hasOption("trustany"))
 				config.setProperty("targets[@trustAny]", true);
-			
+
 			config.setProperty("scripts.dynamicTargetScripting", cmdLine.hasOption("dynamicTargetScripting"));
 
 			String[] targetStrs = cmdLine.getOptionValues("target");
 			if (targetStrs != null) {
-				for (int i=0; i<targetStrs.length; i++) {
+				for (int i = 0; i < targetStrs.length; i++) {
 					int uriPos = targetStrs[i].indexOf('=');
 					if (uriPos < 2)
 						throw new IllegalArgumentException("Invalid target argument.");
 					else if (uriPos + 1 >= targetStrs[i].length())
 						throw new IllegalArgumentException("Invalid target argument.");
 					String patternStr = targetStrs[i].substring(0, uriPos);
-					String urlStr = targetStrs[i].substring(uriPos+1, targetStrs[i].length());
+					String urlStr = targetStrs[i].substring(uriPos + 1);
 					String alias;
 					try {
 						URL url = new URL(urlStr);
 						alias = url.getUserInfo();
 						String scheme = url.getProtocol();
-						if ((! "http".equals(scheme)) && (! "https".equals(scheme)))
+						if ((!"http".equals(scheme)) && (!"https".equals(scheme)))
 							throw new IllegalArgumentException("Invalid target uri scheme.");
 						int port = url.getPort();
 						if (port < 0)
@@ -262,8 +254,7 @@ public class PokerFaceApp {
 						String ref = url.getRef();
 						if (ref != null)
 							urlStr += "#" + ref;
-					}
-					catch(MalformedURLException ex) {
+					} catch (MalformedURLException ex) {
 						throw new IllegalArgumentException("Malformed target uri");
 					}
 					config.addProperty("targets.target(" + i + ")[@pattern]", patternStr);
@@ -272,9 +263,8 @@ public class PokerFaceApp {
 						config.addProperty("targets.target(" + i + ")[@alias]", alias);
 				}
 			}
-//			config.save(System.out);
-		}
-		catch (Throwable e) {
+			//			config.save(System.out);
+		} catch (Throwable e) {
 			e.printStackTrace(System.err);
 			return;
 		}
@@ -284,30 +274,26 @@ public class PokerFaceApp {
 			p.config(config);
 			if (p.start()) {
 				PokerFace.Logger.warn("Started!");
-				Runtime.getRuntime().addShutdownHook(new Thread() {
-					public void run() {
-						try {
-							PokerFace.Logger.warn("Initiating shutdown...");
-							p.stop();
-							PokerFace.Logger.warn("Shutdown completed!");
-						}
-						catch (Throwable e) {
-							PokerFace.Logger.error("Failed to shutdown cleanly!");
-							e.printStackTrace(System.err);
-						}
+				Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+					try {
+						PokerFace.Logger.warn("Initiating shutdown...");
+						p.stop();
+						PokerFace.Logger.warn("Shutdown completed!");
+					} catch (Throwable e) {
+						PokerFace.Logger.error("Failed to shutdown cleanly!");
+						e.printStackTrace(System.err);
 					}
-				});
+				}));
 			}
 			else {
 				PokerFace.Logger.error("Failed to start!");
 				System.exit(-1);
 			}
-		}
-		catch (Throwable e) {
+		} catch (Throwable e) {
 			e.printStackTrace(System.err);
 		}
 	}
-	
+
 	/**
 	 * Break apart a string into a well known address form passing back the pieces.
 	 */
@@ -327,15 +313,13 @@ public class PokerFaceApp {
 				port[0] = "" + defaultPort;
 			else
 				port[0] = "" + url.getPort();
-		}
-		catch (MalformedURLException ex) {
+		} catch (MalformedURLException ex) {
 			throw new IllegalArgumentException("Invalid http(s) address specified.");
 		}
 	}
 
 	private static float JavaVersionAsFloat() {
-		final String[] toParse = System.getProperty("java.version")
-				.split("\\.");
+		final String[] toParse = System.getProperty("java.version").split("\\.");
 		if (toParse.length >= 2) {
 			try {
 				return Float.parseFloat(toParse[0] + '.' + toParse[1]);

@@ -1,4 +1,4 @@
-##PokerFace <(◕___◕)>
+## PokerFace <(◕___◕)>
 
 **PokerFace** is a free, lightweight, asynchronous, streaming, scriptable, http(s) **reverse proxy**.  
 
@@ -17,14 +17,14 @@ Here are some short guides focused on specific objectives to help you get starte
 * [Using log4j or other logging frameworks](http://pcafstockf.github.io/PokerFace/loggingconfig.html).
 * [Https configuration and SSL bridging](http://pcafstockf.github.io/PokerFace/httpsconfig.html).
 
-###Command line options
+### Command line options
 Simple / common scenarios can be easily configured via [the command line](http://pcafstockf.github.io/PokerFace/cmdlineopts.html).  
 More complex scenarios are configured via an [XML configuration file](http://pcafstockf.github.io/PokerFace/configfile.html).  
 
-###Site
+### Site
 The web site and user documentation can be found [here](http://pcafstockf.github.io/PokerFace/index.html).
 
-###Contributing
+### Contributing
 Clarity and simplicity are key principles of PokerFace, so suggestions for improving the documentation are eagerly solicited.
 
 If you like PokerFace, tell everybody about it.  Like any opensource project, the more people using it the better it's going to become.  

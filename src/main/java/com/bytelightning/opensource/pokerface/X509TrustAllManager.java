@@ -24,31 +24,27 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 
 import javax.net.ssl.X509TrustManager;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 /**
  * Simple X509TrustManager that is willing to trust anybody and everybody.
  * We *only* use this to allow connections to any configured or JavaScript endpoint specified remote Target's
  */
 public final class X509TrustAllManager implements X509TrustManager {
-	/**
-	 * {@inheritDoc}
-	 */
+	@SuppressWarnings("RedundantThrows")
+	@Override
 	public void checkClientTrusted(X509Certificate[] xcs, String string) throws CertificateException {
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@SuppressWarnings("RedundantThrows")
+	@Override
 	public void checkServerTrusted(X509Certificate[] xcs, String string) throws CertificateException {
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public X509Certificate[] getAcceptedIssuers() {
 		return null;
 	}

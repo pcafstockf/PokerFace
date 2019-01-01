@@ -24,21 +24,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
+
 import java.nio.file.Path;
 
 /**
- * Implementors will be notified of any changes to a directory they have registered with the <code>FileWatchService</code>.
+ * Implementors will be notified of any changes to a directory they have registered with the {@code FileWatchService}.
  */
 public interface DirectoryWatchEventListener {
 	enum FileChangeType {
-		eRenamed, 
-		eModified, 
-		eDeleted, 
-		eCreated
+		eRenamed, eModified, eDeleted, eCreated
 	}
 
 	/**
 	 * Invoked when a directory/file has changed within a registered 'watch'.
 	 */
-	public void onWatchEvent(Path watchDir, Path oldFile, Path newFile, DirectoryWatchEventListener.FileChangeType change);
+	void onWatchEvent(Path watchDir, Path oldFile, Path newFile, DirectoryWatchEventListener.FileChangeType change);
 }

@@ -24,13 +24,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.nio.ByteBuffer;
-import java.util.Set;
 
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
-
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.message.BasicHttpResponse;
@@ -41,9 +36,14 @@ import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.nio.ByteBuffer;
+import java.util.Set;
+
 /**
- * This class reads in the response we receive back from the remote Target, and then signals the <code>ResponseProducer</code> that it can begin responding back to the requesting client.
- * Note that the <code>ResponseProducer</code> may actually start responding back to the client even before we have fully read the response content from the remote Target.
+ * This class reads in the response we receive back from the remote Target, and then signals the {@code ResponseProducer} that it can begin responding back to the requesting client.
+ * Note that the {@code ResponseProducer} may actually start responding back to the client even before we have fully read the response content from the remote Target.
  */
 @SuppressWarnings("restriction")
 public class TargetResponseConsumer extends TargetBase implements HttpAsyncResponseConsumer<HttpResponse> {
@@ -51,10 +51,11 @@ public class TargetResponseConsumer extends TargetBase implements HttpAsyncRespo
 
 	/**
 	 * Primary constructor
-	 * @param producer	The object that will produce the final response back to the client.
-	 * @param producersBuffer	The buffer which this object will write to, and which the producer will read from.
-	 * @param context	The context of this transaction.
-	 * @param endpoint	If non-null, this is a script endpoint that may wish to alter the response from the target before we send it back to the client.
+	 *
+	 * @param producer        The object that will produce the final response back to the client.
+	 * @param producersBuffer The buffer which this object will write to, and which the producer will read from.
+	 * @param context         The context of this transaction.
+	 * @param endpoint        If non-null, this is a script endpoint that may wish to alter the response from the target before we send it back to the client.
 	 */
 	public TargetResponseConsumer(ResponseProducer producer, BufferIOController producersBuffer, HttpContext context, ScriptObjectMirror endpoint) {
 		this.producer = producer;
@@ -62,6 +63,7 @@ public class TargetResponseConsumer extends TargetBase implements HttpAsyncRespo
 		this.context = context;
 		this.endpoint = endpoint;
 	}
+
 	private final ResponseProducer producer;
 	private final BufferIOController producersBuffer;
 	private final HttpContext context;
@@ -69,19 +71,15 @@ public class TargetResponseConsumer extends TargetBase implements HttpAsyncRespo
 	private volatile HttpResponse response;
 	private volatile boolean completed;
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@SuppressWarnings("RedundantThrows")
 	@Override
 	public void close() throws IOException {
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@SuppressWarnings("Duplicates")
 	@Override
 	public void responseReceived(HttpResponse response) {
-		String id = (String)context.getAttribute("pokerface.txId");	
+		String id = (String) context.getAttribute("pokerface.txId");
 		Logger.info("[proxy<-target] " + id + " " + response.getStatusLine());
 		// Rewrite response!!!!
 		HttpResponse r = new BasicHttpResponse(response.getStatusLine());
@@ -94,23 +92,26 @@ public class TargetResponseConsumer extends TargetBase implements HttpAsyncRespo
 			r.addHeader(hdr);
 		}
 		r.setHeader(CreateHttpViaHeader(response.getFirstHeader("Via"), response.getProtocolVersion()));
-		
+
 		// If a script endpoint was specified, give it a chance to alter the response.
 		if ((endpoint != null) && (endpoint.hasMember("inspectResponse"))) {
 			Object result = endpoint.callMember("inspectResponse", r, context);
 			if (result instanceof HttpResponse)
-				r = (HttpResponse)result;
+				r = (HttpResponse) result;
 		}
-		
-		if (producer.setResponse(r))
+
+		if (producer.setResponse(r)) {
+			this.response = r;
 			Logger.debug("[proxy<-target] " + id + " response received");
+		}
 	}
 
 	/**
 	 * {@inheritDoc}
 	 * This method is only called if the response had content (which it typically does).
-	 * It reads the incoming response data and stores it in it's buffer to be read asynchronously by the <code>ResponseProducer</code> that is part of this request -> request -> response -> response transaction.
+	 * It reads the incoming response data and stores it in it's buffer to be read asynchronously by the {@code ResponseProducer} that is part of this clientRequest to serverRequest to serverResponse to clientResponse transaction.
 	 */
+	@SuppressWarnings("Duplicates")
 	@Override
 	public void consumeContent(ContentDecoder decoder, IOControl ioctrl) throws IOException {
 		producersBuffer.setWritingIOControl(ioctrl);
@@ -121,7 +122,7 @@ public class TargetResponseConsumer extends TargetBase implements HttpAsyncRespo
 			n = decoder.read(bb); // decode the target's response into the ResponseProducers content buffer.
 			producersBuffer.dataWritten();
 		}
-		String id = (String)context.getAttribute("pokerface.txId");
+		String id = (String) context.getAttribute("pokerface.txId");
 		Logger.trace("[proxy<-target] " + id + " " + n + " bytes read");
 		if (decoder.isCompleted())
 			Logger.trace("[proxy<-target] " + id + " content fully read");
@@ -129,7 +130,7 @@ public class TargetResponseConsumer extends TargetBase implements HttpAsyncRespo
 
 	/**
 	 * {@inheritDoc}
-	 * This method also lets the <code>ResponseProducer</code> know that we have received all the content from the remote Target.
+	 * This method also lets the {@code ResponseProducer} know that we have received all the content from the remote Target.
 	 */
 	@Override
 	public void responseCompleted(HttpContext context) {
@@ -139,13 +140,13 @@ public class TargetResponseConsumer extends TargetBase implements HttpAsyncRespo
 		producersBuffer.writeCompleted();
 		if ((endpoint != null) && endpoint.hasMember("responseCompleted"))
 			endpoint.callMember("responseCompleted", context, null);
-		String id = (String)context.getAttribute("pokerface.txId");
+		String id = (String) context.getAttribute("pokerface.txId");
 		Logger.debug("[proxy<-target] " + id + " response completed");
 	}
 
 	/**
 	 * {@inheritDoc}
-	 * This method also notifies the <code>ResponseProducer</code> about this exception.
+	 * This method also notifies the {@code ResponseProducer} about this exception.
 	 */
 	@Override
 	public void failed(Exception ex) {
@@ -160,7 +161,7 @@ public class TargetResponseConsumer extends TargetBase implements HttpAsyncRespo
 
 	/**
 	 * {@inheritDoc}
-	 * This method also notifies the <code>ResponseProducer</code> about the cancellation by invoking our <code>failed</code> method with an <code>InterruptedIOException</code>.
+	 * This method also notifies the {@code ResponseProducer} about the cancellation by invoking our {@code failed} method with an {@code InterruptedIOException}.
 	 */
 	@Override
 	public boolean cancel() {
@@ -170,9 +171,6 @@ public class TargetResponseConsumer extends TargetBase implements HttpAsyncRespo
 		return true;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public HttpResponse getResult() {
 		return response;
@@ -180,16 +178,13 @@ public class TargetResponseConsumer extends TargetBase implements HttpAsyncRespo
 
 	/**
 	 * {@inheritDoc}
-	 * This method returns null as any failure will have already been propagated to the <code>ResponseProducer</code>
+	 * This method returns null as any failure will have already been propagated to the {@code ResponseProducer}
 	 */
 	@Override
 	public Exception getException() {
 		return null;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean isDone() {
 		return completed;

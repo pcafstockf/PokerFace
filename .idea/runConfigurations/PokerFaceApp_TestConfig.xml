@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="PokerFaceApp-TestConfig" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.bytelightning.opensource.pokerface.PokerFaceApp" />
+    <module name="PokerFace" />
+    <option name="PROGRAM_PARAMETERS" value="-config src/test/resources/HelloWorldTestConfig.xml" />
+    <option name="VM_PARAMETERS" value="-ea" />
+    <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

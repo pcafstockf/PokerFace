@@ -24,14 +24,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentMap;
 
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
-
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpStatus;
@@ -40,27 +34,33 @@ import org.apache.http.impl.nio.pool.BasicNIOConnPool;
 import org.apache.http.nio.protocol.HttpAsyncRequester;
 import org.apache.http.protocol.HttpContext;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentMap;
+
 /**
- * Specialization of <code>AbsClientRequestConsumer</code> to consume a client request that will be forwarded to a remote Target.
+ * Specialization of {@code AbsClientRequestConsumer} to consume a client request that will be forwarded to a remote Target.
  * This class examines the incoming request from the client to see if it is mappable to a remote Target.
- * If no viable mapping can be found for the request, this class instructs it's <code>ResponseProducer</code> to return a 404 NOT_FOUND resoponse the the client.
+ * If no viable mapping can be found for the request, this class instructs it's {@code ResponseProducer} to return a 404 NOT_FOUND resoponse the the client.
  */
-@SuppressWarnings("restriction")
+@SuppressWarnings({"restriction", "WeakerAccess"})
 public class RequestForTargetConsumer extends AbsClientRequestConsumer {
 
 	/**
 	 * Primary constructor
-	 * @param context	Context of this request / response transaction
-	 * @param executor	<code>HttpAsyncRequester</code> which will perform the actual request to the remote Target and recieve it's response.
-	 * @param connPool	The client connection pool that will be used by the <code>executor</code>
-	 * @param patternTargetMapping	The mapping of relative uri paths to configured Targets.
-	 * @param dynamicHostMap	If non-null, this is a request modified by a JavaScript endpoint, *and* we are configured to allow the endpoint's to proxy to remote Target's not specified in the configuration file.
-	 * @param requestBuffer	Buffer used to read in the request content from a client (if any) which will then be flipped and sent out to the Target by the <code>TargetRequestProducer</code>
-	 * @param responseBuffer	Buffer used to read in the response content from the remote Target (if any) which will then be flipped and sent back to the client by the <code>TargetResponseConsumer</code>
-	 * @param endpoint	If non-null, the script endpoint which has interjected itself into this transaction.
+	 *
+	 * @param context              Context of this request / response transaction
+	 * @param executor             {@code HttpAsyncRequester} which will perform the actual request to the remote Target and recieve it's response.
+	 * @param connPool             The client connection pool that will be used by the {@code executor}
+	 * @param patternTargetMapping The mapping of relative uri paths to configured Targets.
+	 * @param dynamicHostMap       If non-null, this is a request modified by a JavaScript endpoint, *and* we are configured to allow the endpoint's to proxy to remote Target's not specified in the configuration file.
+	 * @param requestBuffer        Buffer used to read in the request content from a client (if any) which will then be flipped and sent out to the Target by the {@code TargetRequestProducer}
+	 * @param responseBuffer       Buffer used to read in the response content from the remote Target (if any) which will then be flipped and sent back to the client by the {@code TargetResponseConsumer}
+	 * @param endpoint             If non-null, the script endpoint which has interjected itself into this transaction.
 	 */
-	public RequestForTargetConsumer(HttpContext context, HttpAsyncRequester executor, BasicNIOConnPool connPool, Map<String, TargetDescriptor> patternTargetMapping, ConcurrentMap<String, HttpHost> dynamicHostMap,
-					HttpRequest targetRequest, BufferIOController requestBuffer, BufferIOController responseBuffer, ScriptObjectMirror endpoint) {
+	public RequestForTargetConsumer(HttpContext context, HttpAsyncRequester executor, BasicNIOConnPool connPool, Map<String, TargetDescriptor> patternTargetMapping, ConcurrentMap<String, HttpHost> dynamicHostMap, HttpRequest targetRequest, BufferIOController requestBuffer, BufferIOController responseBuffer, ScriptObjectMirror endpoint) {
 		super(context, requestBuffer, new ResponseProducer("proxy", context, responseBuffer));
 		this.executor = executor;
 		this.connPool = connPool;
@@ -70,6 +70,7 @@ public class RequestForTargetConsumer extends AbsClientRequestConsumer {
 		this.endpoint = endpoint;
 		this.responseBuffer = responseBuffer;
 	}
+
 	private final HttpAsyncRequester executor;
 	private final BasicNIOConnPool connPool;
 	private final ConcurrentMap<String, HttpHost> dynamicHostMap;
@@ -84,35 +85,50 @@ public class RequestForTargetConsumer extends AbsClientRequestConsumer {
 	 */
 	@Override
 	public void requestReceived(HttpRequest clientRequest) {
-		String id = (String)context.getAttribute("pokerface.txId");
+		String id = (String) context.getAttribute("pokerface.txId");
 		Logger.info("[client->proxy] " + id + " " + targetRequest.getRequestLine());
 		// We have already been given the targetRequest in our constructor.  This method's 'request' parameter is therefore ignored.
-		
+
 		// Find the remote Target that we have configured to match this request URI.
 		RequestLine reqLine = targetRequest.getRequestLine();
 		TargetDescriptor targetDesc = lookupTargetFromUri(reqLine.getUri());
-		if (targetDesc != null)	// Execute the async request / response transaction against the remote Target.
+		if (targetDesc != null)    // Execute the async request / response transaction against the remote Target.
 			executor.execute(new TargetRequestProducer(targetDesc, targetRequest, context, buffer), new TargetResponseConsumer(producer, responseBuffer, context, endpoint), connPool);
-		else	// No Target was matched against this request.
+		else    // No Target was matched against this request.
 			producer.setResponse(HttpStatus.SC_NOT_FOUND, null);
 	}
 
 	/**
 	 * Looks up the TargetDescriptor matching the given request path.
-	 * NOTE: If 
+	 * NOTE: If
+	 *
 	 * @param uriStr the request path
-	 * @return object or <code>null</code> if no match is found.
+	 * @return object or {@code null} if no match is found.
 	 */
+	@SuppressWarnings("Duplicates")
 	private TargetDescriptor lookupTargetFromUri(final String uriStr) {
 		if (patternTargetMapping == null)
-			return null;	// No remote targets configured.
+			return null;    // No remote targets configured.
 		URI uri;
 		try {
 			uri = new URI(uriStr);
-		}
-		catch (URISyntaxException e) {
-			Logger.error("Impossibly, the HttpRequest contained an unparsable uri", e);
-			return null;
+		} catch (URISyntaxException e) {
+			int queryPos = uriStr.indexOf('?');
+			if (queryPos < 0)
+				queryPos = uriStr.indexOf('#');
+			if (queryPos > 1) {
+				// For our purposes, the query and anchor are not relevant
+				try {
+					uri = new URI(uriStr.substring(0, queryPos));
+				} catch (URISyntaxException e1) {
+					Logger.error("Impossibly, the HttpRequest contained an unparsable uri", e);
+					return null;
+				}
+			}
+			else {
+				Logger.error("Impossibly, the HttpRequest contained an unparsable uri", e);
+				return null;
+			}
 		}
 		String key = lookupKeyFromPath(uri.getPath().toLowerCase());
 		TargetDescriptor retVal = patternTargetMapping.get(key);
@@ -121,11 +137,11 @@ public class RequestForTargetConsumer extends AbsClientRequestConsumer {
 		// 	AND this request came from our own script, 
 		// Then generate a dynamic Target (and remember it).
 		if ((retVal == null) && (dynamicHostMap != null)) {
-			String[] scheme = { null };
-			String[] host = { null };
-			int[] port = { 0 };
-			String[] path = { null };
-			int[] stripPrefixCount = { 0 };
+			String[] scheme = {null};
+			String[] host = {null};
+			int[] port = {0};
+			String[] path = {null};
+			int[] stripPrefixCount = {0};
 			key = UriToTargetKey(uri, scheme, host, port, path, stripPrefixCount);
 			HttpHost httpHost = dynamicHostMap.get(key);
 			if (httpHost == null) {
@@ -161,9 +177,10 @@ public class RequestForTargetConsumer extends AbsClientRequestConsumer {
 	}
 
 	/**
-	 * Is <code>pattern</code> a closer match than <code>bestMatch</code>?
+	 * Is {@code pattern} a closer match than {@code bestMatch}?
 	 */
 	private static boolean IsBetterMatch(String bestMatch, String pattern) {
+		//noinspection RedundantIfStatement
 		if (bestMatch == null || (bestMatch.length() < pattern.length()) || (bestMatch.length() == pattern.length() && pattern.endsWith("*")))
 			return true;
 		return false;
@@ -176,7 +193,7 @@ public class RequestForTargetConsumer extends AbsClientRequestConsumer {
 		if (pattern.equals("*"))
 			return true;
 		else
-			return (pattern.endsWith("*") && uriPath.startsWith(pattern.substring(0, pattern.length() - 1))) || (pattern.startsWith("*") && uriPath.endsWith(pattern.substring(1, pattern.length())));
+			return (pattern.endsWith("*") && uriPath.startsWith(pattern.substring(0, pattern.length() - 1))) || (pattern.startsWith("*") && uriPath.endsWith(pattern.substring(1)));
 	}
 
 	/**
@@ -186,8 +203,7 @@ public class RequestForTargetConsumer extends AbsClientRequestConsumer {
 		URI uri;
 		try {
 			uri = new URI(remoteTargetUri);
-		}
-		catch (URISyntaxException e) {
+		} catch (URISyntaxException e) {
 			Logger.error("Invalid URI provided for host key", e);
 			return null;
 		}
@@ -195,14 +211,15 @@ public class RequestForTargetConsumer extends AbsClientRequestConsumer {
 	}
 
 	/**
-	 * Break out a <code>URI</code> into it's component parts, and re-assemble them into a lowercase key representing the target.
-	 * @param remoteTargetUri	The input
-	 * @param scheme	"pass-by-reference" which if non-null will be populated with: https or http (if not explicitly https)
-	 * @param host	"pass-by-reference" which if non-null will be populated with: The name of the Target server.
-	 * @param port	"pass-by-reference" which if non-null will be populated with: The port the Target server is listening on (if not specified will be 80 for http and 443 for https).
-	 * @param path	"pass-by-reference" which if non-null will be populated with: The Path portion of the provided uri.
-	 * @param stripPrefixCount	"pass-by-reference" which if non-null will be populated with: This is actually an Integer.parse of the anchor portion of the uri which is used as a means to specify how much of the requesting uri should be stripped off before appending it to the host:port/path of the Target.
-	 * @return	A key that may be used to uniquely identify this remote Target.
+	 * Break out a {@code URI} into it's component parts, and re-assemble them into a lowercase key representing the target.
+	 *
+	 * @param remoteTargetUri  The input
+	 * @param scheme           "pass-by-reference" which if non-null will be populated with: https or http (if not explicitly https)
+	 * @param host             "pass-by-reference" which if non-null will be populated with: The name of the Target server.
+	 * @param port             "pass-by-reference" which if non-null will be populated with: The port the Target server is listening on (if not specified will be 80 for http and 443 for https).
+	 * @param path             "pass-by-reference" which if non-null will be populated with: The Path portion of the provided uri.
+	 * @param stripPrefixCount "pass-by-reference" which if non-null will be populated with: This is actually an Integer.parse of the anchor portion of the uri which is used as a means to specify how much of the requesting uri should be stripped off before appending it to the host:port/path of the Target.
+	 * @return A key that may be used to uniquely identify this remote Target.
 	 */
 	public static String UriToTargetKey(URI remoteTargetUri, String[] scheme, String[] host, int[] port, String[] path, int[] stripPrefixCount) {
 		if (remoteTargetUri == null)

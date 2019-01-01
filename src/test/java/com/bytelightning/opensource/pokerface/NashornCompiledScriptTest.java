@@ -24,29 +24,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-import java.util.ArrayList;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
-import javax.script.Compilable;
-import javax.script.CompiledScript;
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptException;
-
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import org.junit.*;
+
+import javax.script.*;
+import java.util.ArrayList;
+import java.util.concurrent.*;
 
 /**
  * This is not really a unit test and does not need to be run prior to checking.  It's primary purpose is as a POC WRT how the Nashorn engine can safely be used.
@@ -58,38 +43,15 @@ public class NashornCompiledScriptTest {
 	public static void setUpBeforeClass() throws Exception {
 		engineFactory = new NashornScriptEngineFactory();
 		engine = engineFactory.getScriptEngine();
-		String script = new StringBuilder("")
-			.append("(function() {")
-			.append("	var i = 0;")
-			.append("	return {")
-			.append("		setI: function(val) {")
-			.append("			i = val;")
-			.append("		},")
-			.append("		addTwice: function(amount) {")
-			.append("			var x = amount;")
-			.append("			i += amount;")
-			.append("			var shortly_later = new Date()/1000 + Math.random;")
-			.append("			while( (new Date()/1000) < shortly_later) { Math.random() };")
-			.append("			i += x;")
-			.append("		},")
-			.append("		getI: function() {")
-			.append("			return i;")
-			.append("		},")
-			.append("		square: function(val) {")
-			.append("			var x = val;")
-			.append("			var shortly_later = new Date()/1000 + Math.random;")
-			.append("			while( (new Date()/1000) < shortly_later) { Math.random() };")
-			.append("			return (val * x);")
-			.append("		},")
-			.append("	};")
-			.append("})();")
-			.toString();
-		compiledScript = ((Compilable)engine).compile(script);
+		@SuppressWarnings("StringBufferReplaceableByString") String script = new StringBuilder().append("(function() {").append("	var i = 0;").append("	return {").append("		setI: function(val) {").append("			i = val;").append("		},").append("		addTwice: function(amount) {").append("			var x = amount;").append("			i += amount;").append("			var shortly_later = new Date()/1000 + Math.random;").append("			while( (new Date()/1000) < shortly_later) { Math.random() };").append("			i += x;").append("		},").append("		getI: function() {").append("			return i;").append("		},").append("		square: function(val) {").append("			var x = val;").append("			var shortly_later = new Date()/1000 + Math.random;").append("			while( (new Date()/1000) < shortly_later) { Math.random() };").append("			return (val * x);").append("		},").append("	};").append("})();").toString();
+		compiledScript = ((Compilable) engine).compile(script);
 	}
+
 	private static NashornScriptEngineFactory engineFactory;
 	private static ScriptEngine engine;
 	private static CompiledScript compiledScript;
 
+	@SuppressWarnings("RedundantThrows")
 	@Before
 	public void setUp() throws Exception {
 	}
@@ -104,58 +66,53 @@ public class NashornCompiledScriptTest {
 		result = (Number) obj.callMember("getI");
 		Assert.assertEquals("addTwice works", 7, result.intValue());
 	}
-	
+
 	/**
 	 * This test answers the question of whether we can:
-	 * 	1.)  Compile a script using an engine created on the main thread.
-	 * 	2.)  Eval that script (also on the main thread) to produce an object with immutable methods *and* mutable methods which *modify* internal object state/properties encapsulated/protected within a closure.
-	 * 	3.)  Safely invoke the objects immutable methods from *ANY* thread (often simultaneously).
-	 * 	4.)  Safely invoke the objects mutable methods from *ANY* thread as long as the object is synchronized (e.g. not invoked *simultaneously* from multiple threads).
-	 * 	5.)  Safely invoke immutable methods from multiple threads while a synchronized mutable method is being simultaneously executed in another thread.
-	 *  6.)  Variables declared within the scope of the objects methods (not object properties), are not affected by executing that same method in other threads simultaneously.
+	 * 1.)  Compile a script using an engine created on the main thread.
+	 * 2.)  Eval that script (also on the main thread) to produce an object with immutable methods *and* mutable methods which *modify* internal object state/properties encapsulated/protected within a closure.
+	 * 3.)  Safely invoke the objects immutable methods from *ANY* thread (often simultaneously).
+	 * 4.)  Safely invoke the objects mutable methods from *ANY* thread as long as the object is synchronized (e.g. not invoked *simultaneously* from multiple threads).
+	 * 5.)  Safely invoke immutable methods from multiple threads while a synchronized mutable method is being simultaneously executed in another thread.
+	 * 6.)  Variables declared within the scope of the objects methods (not object properties), are not affected by executing that same method in other threads simultaneously.
 	 */
 	@Test
 	public void testMultiThread() throws ScriptException, InterruptedException, ExecutionException {
 		final ScriptObjectMirror obj = (ScriptObjectMirror) compiledScript.eval();
 		obj.callMember("setI", 2);
-		final SquareInterface sq = ((Invocable)engine).getInterface(obj, SquareInterface.class);
+		final SquareInterface sq = ((Invocable) engine).getInterface(obj, SquareInterface.class);
 
-		Callable<Boolean> testMutableTask = new Callable<Boolean>() {
-			@Override
-			public Boolean call() {
-				int i = (int)(Math.random() * 10);
-				int j = (int)(Math.random() * 10);
-				// Validate that if the object is synchronized, it's state may be altered from different threads.
-				synchronized (obj) {
-					obj.callMember("setI", i);
-					Number result = (Number) obj.callMember("getI");
-					if (result.intValue() != i)
-						return false;
-					obj.callMember("addTwice", j);
-					result = (Number) obj.callMember("getI");
-					if (result.intValue() != (i + (j * 2)))
-						return false;
-				}
-				return true;
+		Callable<Boolean> testMutableTask = () -> {
+			int i = (int) (Math.random() * 10);
+			int j = (int) (Math.random() * 10);
+			// Validate that if the object is synchronized, it's state may be altered from different threads.
+			synchronized (obj) {
+				obj.callMember("setI", i);
+				Number result = (Number) obj.callMember("getI");
+				if (result.intValue() != i)
+					return false;
+				obj.callMember("addTwice", j);
+				result = (Number) obj.callMember("getI");
+				if (result.intValue() != (i + (j * 2)))
+					return false;
 			}
+			return true;
 		};
-		Callable<Boolean> testImutableTask = new Callable<Boolean>() {
-			@Override
-			public Boolean call() {
-				int i = (int)(Math.random() * 10);
-				// Validate that methods which do not alter the objects state may be invoked from multiple threads simultaneously.
-				Number result = (Number) obj.callMember("square", i);
-				if (result.intValue() != (i * i))
-					return false;
-				int secondResult = sq.square(i);
-				if (secondResult != (i * i))
-					return false;
-				return true;
-			}
+		Callable<Boolean> testImutableTask = () -> {
+			int i = (int) (Math.random() * 10);
+			// Validate that methods which do not alter the objects state may be invoked from multiple threads simultaneously.
+			Number result = (Number) obj.callMember("square", i);
+			if (result.intValue() != (i * i))
+				return false;
+			int secondResult = sq.square(i);
+			//noinspection RedundantIfStatement
+			if (secondResult != (i * i))
+				return false;
+			return true;
 		};
 
 		ExecutorService executor = Executors.newCachedThreadPool();
-		ArrayList<Future<Boolean>> results = new ArrayList<Future<Boolean>>();
+		ArrayList<Future<Boolean>> results = new ArrayList<>();
 		for (int i = 0; i < 500; i++) {
 			if (Math.random() > 0.5) {
 				results.add(executor.submit(testMutableTask));
@@ -174,10 +131,12 @@ public class NashornCompiledScriptTest {
 		executor.shutdownNow();
 	}
 
+	@SuppressWarnings("RedundantThrows")
 	@After
 	public void tearDown() throws Exception {
 	}
 
+	@SuppressWarnings("RedundantThrows")
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 		compiledScript = null;

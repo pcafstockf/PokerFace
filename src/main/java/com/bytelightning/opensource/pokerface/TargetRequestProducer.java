@@ -24,15 +24,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Set;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.RequestLine;
+import org.apache.http.*;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.nio.ContentEncoder;
@@ -42,22 +35,27 @@ import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Set;
+
 /**
  * This class forwards the request we received from a client on to a remote Target.
- * In the streaming spirit, this class is created as soon as a remote Target is identified, and may actually make the HttpRequest 
+ * In the streaming spirit, this class is created as soon as a remote Target is identified, and may actually make the HttpRequest
  * to the remote Target before we have fully received the content of the request from the client.
- * This class uses the <code>BufferIOController</code> to coordinate reading flow control from the <code>RequestForTargetConsumer</code>'s incoming request content buffer.
- * For this reason, this class has the responsibility for closing the buffer that was given to the <code>RequestForTargetConsumer</code> by the <code>RequestHandler</code>
+ * This class uses the {@code BufferIOController} to coordinate reading flow control from the {@code RequestForTargetConsumer}'s incoming request content buffer.
+ * For this reason, this class has the responsibility for closing the buffer that was given to the {@code RequestForTargetConsumer} by the {@code RequestHandler}
  */
 public class TargetRequestProducer extends TargetBase implements HttpAsyncRequestProducer {
 	protected static final Logger Logger = LoggerFactory.getLogger(TargetRequestProducer.class.getPackage().getName());
-	
+
 	/**
 	 * Primary constructor
-	 * @param targetDesc	The remote Target
-	 * @param clientRequest	The request we received from the client.
-	 * @param context	The context of this request / response transaction.
-	 * @param buffer	The buffer containing the content (if any) of the original request from the client.
+	 *
+	 * @param targetDesc    The remote Target
+	 * @param clientRequest The request we received from the client.
+	 * @param context       The context of this request / response transaction.
+	 * @param buffer        The buffer containing the content (if any) of the original request from the client.
 	 */
 	public TargetRequestProducer(TargetDescriptor targetDesc, HttpRequest clientRequest, HttpContext context, BufferIOController buffer) {
 		this.targetDesc = targetDesc;
@@ -65,6 +63,7 @@ public class TargetRequestProducer extends TargetBase implements HttpAsyncReques
 		this.context = context;
 		this.buffer = buffer;
 	}
+
 	private final TargetDescriptor targetDesc;
 	private final HttpRequest clientRequest;
 	private final HttpContext context;
@@ -72,24 +71,20 @@ public class TargetRequestProducer extends TargetBase implements HttpAsyncReques
 
 	/**
 	 * {@inheritDoc}
-	 * Close the content buffer given to us by the <code>RequestForTargetConsumer</code>.
+	 * Close the content buffer given to us by the {@code RequestForTargetConsumer}.
 	 */
+	@SuppressWarnings("RedundantThrows")
 	@Override
 	public void close() throws IOException {
 		buffer.close();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public HttpHost getTarget() {
 		return targetDesc.getTarget();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@SuppressWarnings("Duplicates")
 	@Override
 	public HttpRequest generateRequest() {
 		// Munge the uri as needed to match the remote Target root.
@@ -98,7 +93,7 @@ public class TargetRequestProducer extends TargetBase implements HttpAsyncReques
 		String pathSuffix;
 		if (discardCount > 0) {
 			String uri = reqLine.getUri();
-			pathSuffix = uri.substring(discardCount, uri.length());
+			pathSuffix = uri.substring(discardCount);
 		}
 		else
 			pathSuffix = reqLine.getUri();
@@ -108,7 +103,7 @@ public class TargetRequestProducer extends TargetBase implements HttpAsyncReques
 		HttpRequest retVal;
 		if (clientRequest instanceof HttpEntityEnclosingRequest) {
 			retVal = new BasicHttpEntityEnclosingRequest(reqLine.getMethod(), newUri, reqLine.getProtocolVersion());
-			((BasicHttpEntityEnclosingRequest)retVal).setEntity(((HttpEntityEnclosingRequest) clientRequest).getEntity());
+			((BasicHttpEntityEnclosingRequest) retVal).setEntity(((HttpEntityEnclosingRequest) clientRequest).getEntity());
 		}
 		else
 			retVal = new BasicHttpRequest(reqLine.getMethod(), newUri, clientRequest.getProtocolVersion());
@@ -122,7 +117,7 @@ public class TargetRequestProducer extends TargetBase implements HttpAsyncReques
 		}
 		retVal.setHeader(CreateHttpViaHeader(clientRequest.getFirstHeader("Via"), clientRequest.getProtocolVersion()));
 
-		String id = (String)context.getAttribute("pokerface.txId");
+		String id = (String) context.getAttribute("pokerface.txId");
 		Logger.info("[proxy->target] " + id + " " + retVal.getRequestLine());
 		return retVal;
 	}
@@ -130,8 +125,9 @@ public class TargetRequestProducer extends TargetBase implements HttpAsyncReques
 	/**
 	 * {@inheritDoc}
 	 * This method is only called if the request has content (e.g. POST).
-	 * It flips it's buffer (which the <code>RequestForTargetConsumer</code> has asynchronously written into), reads the request data and encodes it out to the remote Target.
+	 * It flips it's buffer (which the {@code RequestForTargetConsumer} has asynchronously written into), reads the request data and encodes it out to the remote Target.
 	 */
+	@SuppressWarnings("Duplicates")
 	@Override
 	public void produceContent(final ContentEncoder encoder, final IOControl ioctrl) throws IOException {
 		buffer.setReadingIOControl(ioctrl);
@@ -145,7 +141,7 @@ public class TargetRequestProducer extends TargetBase implements HttpAsyncReques
 			bb.compact();
 			eof = buffer.dataRead();
 		}
-		String id = (String)context.getAttribute("pokerface.txId");
+		String id = (String) context.getAttribute("pokerface.txId");
 		Logger.trace("[proxy->target] " + id + " " + n + " bytes written");
 		if (eof) {
 			encoder.complete();
@@ -153,12 +149,9 @@ public class TargetRequestProducer extends TargetBase implements HttpAsyncReques
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void requestCompleted(final HttpContext context) {
-		String id = (String)context.getAttribute("pokerface.txId");
+		String id = (String) context.getAttribute("pokerface.txId");
 		Logger.debug("[proxy->target] " + id + " request completed");
 	}
 
@@ -179,12 +172,9 @@ public class TargetRequestProducer extends TargetBase implements HttpAsyncReques
 	public void resetRequest() {
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void failed(final Exception ex) {
-//TODO: Shouldn't TargetRequestProducer.failed be notifying somebody that it failed it's task?
+		//TODO: Shouldn't TargetRequestProducer.failed be notifying somebody that it failed it's task?
 		Logger.warn("[proxy->target] ", ex);
 	}
 }

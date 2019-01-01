@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="PokerFaceApp-NoScript" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.bytelightning.opensource.pokerface.PokerFaceApp" />
+    <module name="PokerFace" />
+    <option name="PROGRAM_PARAMETERS" value="-listen server-alias,ssl=0.0.0.0:8080 -listen 127.0.0.1:8081 -servercpu 1 -targetcpu 1 -target &quot;/*=http://www.bytelightning.com&quot; -keystore src/test/resources/PokerFaceTestKeystore.jks -keypass changeit" />
+    <option name="VM_PARAMETERS" value="-ea -Dorg.slf4j.simpleLogger.defaultLogLevel=TRACE -Dorg.slf4j.simpleLogger.logFile=System.out" />
+    <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

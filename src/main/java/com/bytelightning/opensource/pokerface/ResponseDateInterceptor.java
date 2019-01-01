@@ -24,16 +24,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-import java.io.IOException;
-import java.util.Date;
 
-import org.apache.http.Header;
-import org.apache.http.HttpException;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.HttpStatus;
+import org.apache.http.*;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
+
+import java.io.IOException;
+import java.util.Date;
 
 /**
  * Similar to org.apache.http.ResponseDate, this class adds the Date header to the outgoing responses.
@@ -45,6 +42,8 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
 	/**
 	 * Add a date header and possibly rewrite the 'Expires' header (see class documentation).
 	 */
+	@SuppressWarnings("RedundantThrows")
+	@Override
 	public void process(final HttpResponse response, final HttpContext context) throws HttpException, IOException {
 		final int status = response.getStatusLine().getStatusCode();
 		if ((status >= HttpStatus.SC_OK) && !response.containsHeader(HTTP.DATE_HEADER)) {
@@ -60,8 +59,7 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
 						lval += now;
 						sval = Utils.GetHTTPDateFormater().format(new Date(lval));
 						response.setHeader("Expires", sval);
-					}
-					catch (NumberFormatException nfe) {
+					} catch (NumberFormatException nfe) {
 						// Do nothing
 					}
 				}

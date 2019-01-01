@@ -24,8 +24,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-import java.io.IOException;
-import java.util.Locale;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -46,19 +44,24 @@ import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.Locale;
+
 /**
  * Produce a response (back to the client) in response to the HttpRequest from the client.
- * It is possible that we can begin producing a response to the client *before* <code>RequestHandler.handle</code> is invoked by the framework.
- * To accommodate that, this class has two methods <code>setResponse</code> and <code>setTrigger</code>.  Please see those methods for details.
+ * It is possible that we can begin producing a response to the client *before* {@code RequestHandler.handle} is invoked by the framework.
+ * To accommodate that, this class has two methods {@code setResponse} and {@code setTrigger}.  Please see those methods for details.
  */
+@SuppressWarnings("WeakerAccess")
 public class ResponseProducer implements HttpAsyncResponseProducer {
 	protected static final Logger Logger = LoggerFactory.getLogger(ResponseProducer.class.getPackage().getName());
 
 	/**
 	 * Primary constructor.
-	 * @param context	The context of this transaction
-	 * @param role	The role played by this producer (e.g. server, proxy, endpoint).
-	 * @param contentProducer	The object that will asynchronously produce the content for this response.
+	 *
+	 * @param context         The context of this transaction
+	 * @param role            The role played by this producer (e.g. server, proxy, endpoint).
+	 * @param contentProducer The object that will asynchronously produce the content for this response.
 	 */
 	public ResponseProducer(String role, HttpContext context, HttpAsyncContentProducer contentProducer) {
 		this.context = context;
@@ -67,6 +70,7 @@ public class ResponseProducer implements HttpAsyncResponseProducer {
 		this.response = null;
 		this.trigger = null;
 	}
+
 	protected final HttpContext context;
 	protected final String role;
 	protected volatile HttpAsyncContentProducer contentProducer;
@@ -75,21 +79,23 @@ public class ResponseProducer implements HttpAsyncResponseProducer {
 
 	/**
 	 * Alternate constructor (content to be produced from the supplied IOControlled buffer.
-	 * @param context	The context of this transaction
-	 * @param role	The role played by this producer (e.g. server, proxy, endpoint).
-	 * @param buffer	A buffer from which response content may be asynchronously read and sent back to the client.
+	 *
+	 * @param context The context of this transaction
+	 * @param role    The role played by this producer (e.g. server, proxy, endpoint).
+	 * @param buffer  A buffer from which response content may be asynchronously read and sent back to the client.
 	 */
 	public ResponseProducer(String role, HttpContext context, BufferIOController buffer) {
-		this(role, context, new BufferContentProducer(buffer, (String)context.getAttribute("pokerface.txId"), role));
+		this(role, context, new BufferContentProducer(buffer, (String) context.getAttribute("pokerface.txId"), role));
 	}
-	
+
 	/**
 	 * Alternate constructor (content producer to be extracted later from the HttpResponse entity).
-	 * @param context	The context of this transaction
-	 * @param role	The role played by this producer (e.g. server, proxy, endpoint).
+	 *
+	 * @param context The context of this transaction
+	 * @param role    The role played by this producer (e.g. server, proxy, endpoint).
 	 */
 	public ResponseProducer(String role, HttpContext context) {
-		this(role, context, (HttpAsyncContentProducer)null);
+		this(role, context, (HttpAsyncContentProducer) null);
 	}
 
 	/**
@@ -104,12 +110,12 @@ public class ResponseProducer implements HttpAsyncResponseProducer {
 
 	/**
 	 * {@inheritDoc}
-	 * Someone else always generates the response and invokes one of our <code>setResponse</code> or <code>setException</code> methods.
+	 * Someone else always generates the response and invokes one of our {@code setResponse} or {@code setException} methods.
 	 * This method returns whatever that response was.
 	 */
 	@Override
 	public HttpResponse generateResponse() {
-		String id = (String)context.getAttribute("pokerface.txId");
+		String id = (String) context.getAttribute("pokerface.txId");
 		Logger.info("[client<-" + role + "] " + id + " " + response.getStatusLine());
 		return response;
 	}
@@ -125,23 +131,17 @@ public class ResponseProducer implements HttpAsyncResponseProducer {
 		if (encoder.isCompleted()) {
 			contentProducer.close();
 			contentProducer = null;
-			String id = (String)context.getAttribute("pokerface.txId");
+			String id = (String) context.getAttribute("pokerface.txId");
 			Logger.trace("[client<-" + role + "] " + id + " content fully written");
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void responseCompleted(HttpContext context) {
-		String id = (String)context.getAttribute("pokerface.txId");
+		String id = (String) context.getAttribute("pokerface.txId");
 		Logger.debug("[client<-" + role + "] " + id + " response completed");
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void failed(Exception ex) {
 		setException(ex);
@@ -151,12 +151,12 @@ public class ResponseProducer implements HttpAsyncResponseProducer {
 	 * Send back an appropriate response to the client.
 	 */
 	public void setException(Exception ex) {
-		String id = (String)context.getAttribute("pokerface.txId");
+		String id = (String) context.getAttribute("pokerface.txId");
 		Logger.warn("[client<-" + role + "] " + id, ex);
 		setResponse(HttpStatus.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
-		
+
 	}
-	
+
 	/**
 	 * Send back the specified response to the client
 	 */
@@ -167,15 +167,15 @@ public class ResponseProducer implements HttpAsyncResponseProducer {
 		response.addHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_CLOSE);
 		response.setEntity(new NStringEntity(message, ContentType.DEFAULT_TEXT));
 		if (setResponse(response)) {
-			String id = (String)context.getAttribute("pokerface.txId");
+			String id = (String) context.getAttribute("pokerface.txId");
 			Logger.trace("[client<-" + role + "] " + id + " response triggered [" + message + "]");
-		}	
+		}
 	}
 
 	/**
 	 * Determines the HttpResponse that will be sent back to the requesting client.
-	 * If the <code>RequestHandler.handle</code> method has already armed us with an <code>HttpAsyncExchange</code> response trigger, then invoke it's <code>submitResponse</code> method.
-	 * Otherwise keep track of the response until our <code>setTrigger</code> method is invoked (at which time the trigger's <code>submitResponse</code> method will be called and this response will be sent back to the client).
+	 * If the {@code RequestHandler.handle} method has already armed us with an {@code HttpAsyncExchange} response trigger, then invoke it's {@code submitResponse} method.
+	 * Otherwise keep track of the response until our {@code setTrigger} method is invoked (at which time the trigger's {@code submitResponse} method will be called and this response will be sent back to the client).
 	 */
 	public synchronized boolean setResponse(HttpResponse response) {
 		assert response != null;
@@ -198,9 +198,9 @@ public class ResponseProducer implements HttpAsyncResponseProducer {
 	}
 
 	/**
-	 * Called from the  <code>RequestHandler.handle</code> method this method keeps track of the supplied trigger.
-	 * If our <code>setResponse</code> method has already been called to specify our response, then we invoke the trigger's <code>submitResponse</code> method to send our response back to the client
-	 * Otherwise keep track of the trigger until our <code>setResponse</code> method is invoked (at which time it will invoke the trigger's <code>submitResponse</code> method to send our response back to the client).
+	 * Called from the  {@code RequestHandler.handle} method this method keeps track of the supplied trigger.
+	 * If our {@code setResponse} method has already been called to specify our response, then we invoke the trigger's {@code submitResponse} method to send our response back to the client
+	 * Otherwise keep track of the trigger until our {@code setResponse} method is invoked (at which time it will invoke the trigger's {@code submitResponse} method to send our response back to the client).
 	 */
 	public synchronized boolean setTrigger(HttpAsyncExchange trigger) {
 		assert trigger != null;

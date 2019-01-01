@@ -28,7 +28,9 @@ SOFTWARE.
 /**
  * Invoked by script endpoints to let PokerFace know they have completed their setup process.
  */
+@SuppressWarnings("unused")
 public interface SetupCompleteCallback {
-	public void setupComplete();
-	public void setupFailed(String msg);
+	void setupComplete();
+
+	void setupFailed(String msg);
 }

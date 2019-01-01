@@ -24,8 +24,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-import java.io.IOException;
-import java.nio.ByteBuffer;
 
 import org.apache.http.nio.ContentEncoder;
 import org.apache.http.nio.IOControl;
@@ -33,31 +31,34 @@ import org.apache.http.nio.entity.HttpAsyncContentProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
 /**
  * Produces asynchronous content from an IOControlled byte buffer.
  * This class is primarily used to produce the content from a remote target back to a requesting client.
  */
+@SuppressWarnings("WeakerAccess")
 public class BufferContentProducer implements HttpAsyncContentProducer {
 	protected static final Logger Logger = LoggerFactory.getLogger(BufferContentProducer.class.getPackage().getName());
-	
+
 	/**
 	 * Primary constructor
-	 * @param buffer	The buffer that content will be produced from
-	 * @param txId	The transaction id that this object is participating in
-	 * @param role	The roll of this producer (e.g. server, proxy, etc.).
+	 *
+	 * @param buffer The buffer that content will be produced from
+	 * @param txId   The transaction id that this object is participating in
+	 * @param role   The roll of this producer (e.g. server, proxy, etc.).
 	 */
 	public BufferContentProducer(BufferIOController buffer, String txId, String role) {
 		this.buffer = buffer;
 		this.txId = txId;
 		this.role = role;
 	}
+
 	private final BufferIOController buffer;
 	private final String txId;
 	private final String role;
-	
-	/**
-	 * {@inheritDoc}
-	 */
+
 	@Override
 	public boolean isRepeatable() {
 		return false;
@@ -65,8 +66,9 @@ public class BufferContentProducer implements HttpAsyncContentProducer {
 
 	/**
 	 * {@inheritDoc}
-	 * Close the content buffer.
+	 * This specialization closes the content buffer.
 	 */
+	@SuppressWarnings("RedundantThrows")
 	@Override
 	public void close() throws IOException {
 		buffer.close();
@@ -77,6 +79,7 @@ public class BufferContentProducer implements HttpAsyncContentProducer {
 	 * This method is only called if the response has content (which is typically the case).
 	 * It flips it's buffer (which some other object  has asynchronously written into), reads the response data and encodes it out to the client who requested it.
 	 */
+	@SuppressWarnings("Duplicates")
 	@Override
 	public void produceContent(ContentEncoder encoder, IOControl ioctrl) throws IOException {
 		buffer.setReadingIOControl(ioctrl);

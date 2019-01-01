@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="PokerFace" xmlns="http://maven.apache.org/DECORATION/1.3.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/DECORATION/1.3.0 http://maven.apache.org/xsd/decoration-1.3.0.xsd">
+<project name="PokerFace" xmlns="http://maven.apache.org/DECORATION/1.8.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.0 http://maven.apache.org/xsd/decoration-1.8.0.xsd">
 	<bannerLeft>
 		<name>PokerFace &lt;(◕___◕)&gt;</name>
 	</bannerLeft>
-	<publishDate position="none" />
-	<version position="none" />
+	<publishDate position="none"/>
+	<version position="none"/>
 	<poweredBy>
-		<logo name="Foo" href="http://www.bytelightning.com/" img="./powered-by.png" />
+		<logo name="Foo" href="http://www.bytelightning.com/" img="./powered-by.png"/>
 	</poweredBy>
 	<skin>
 		<groupId>org.apache.maven.skins</groupId>
 		<artifactId>maven-fluido-skin</artifactId>
-		<version>1.3.1</version>
+		<version>1.7</version>
 	</skin>
 	<custom>
 		<fluidoSkin>
@@ -27,12 +27,12 @@
 	</custom>
 	<body>
 		<menu>
-			<item name="Introduction" href="./index.html" />
-			<item name="Downloads" href="./downloads.html" />
-			<item name="Source Code" href="https://www.github.com/pcafstockf/PokerFace" />
-			<item name="Benchmarks" href="./benchmarks.html" />
-			<item name="Dev Guide" href="./overview-dev.html" />
-			<item name="Java Doc" href="./apidocs/index.html" />
+			<item name="Introduction" href="./index.html"/>
+			<item name="Downloads" href="./downloads.html"/>
+			<item name="Source Code" href="https://www.github.com/pcafstockf/PokerFace"/>
+			<item name="Benchmarks" href="./benchmarks.html"/>
+			<item name="Dev Guide" href="./overview-dev.html"/>
+			<item name="Java Doc" href="./apidocs/index.html"/>
 		</menu>
 	</body>
 </project>

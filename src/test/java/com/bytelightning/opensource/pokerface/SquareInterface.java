@@ -26,9 +26,9 @@ SOFTWARE.
  */
 
 /**
- * Simple test interface that the <code>NashornCompiledScriptTest</code> binds to a <code>ScriptMirrorObject</code>
+ * Simple test interface that the {@code NashornCompiledScriptTest} binds to a {@code ScriptMirrorObject}
  * Interfaces that will be bound cannot be inner to some other class.
  */
 public interface SquareInterface {
-	public int square(int val);
+	int square(int val);
 }

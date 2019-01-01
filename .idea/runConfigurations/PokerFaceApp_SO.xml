@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="PokerFaceApp-SO" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.bytelightning.opensource.pokerface.PokerFaceApp" />
+    <module name="PokerFace" />
+    <option name="PROGRAM_PARAMETERS" value="-listen 127.0.0.1:8080 -target &quot;/*=http://stackoverflow.com&quot;" />
+    <option name="VM_PARAMETERS" value="-ea" />
+    <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

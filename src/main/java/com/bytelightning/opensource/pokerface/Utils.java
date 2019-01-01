@@ -24,6 +24,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
+
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.nio.entity.NByteArrayEntity;
+import org.apache.http.nio.entity.NFileEntity;
+import org.apache.http.nio.entity.NStringEntity;
+
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -41,38 +49,32 @@ import java.text.SimpleDateFormat;
 import java.util.Properties;
 import java.util.TimeZone;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.nio.entity.NByteArrayEntity;
-import org.apache.http.nio.entity.NFileEntity;
-import org.apache.http.nio.entity.NStringEntity;
-
 /**
  * Useful collection of Http related utility methods.
  */
+@SuppressWarnings("WeakerAccess")
 public class Utils {
 	public static final String Version;
+
 	static {
 		Properties pomProps = new Properties();
 		try (Reader r = new InputStreamReader(Utils.class.getResourceAsStream("/META-INF/maven/com.bytelightning.opensource.pokerface/PokerFace/pom.properties"), Charset.forName("utf-8"))) {
 			pomProps.load(r);
-		}
-		catch (Throwable e) {
+		} catch (Throwable e) {
 			pomProps.put("version", "?");
 		}
 		Version = pomProps.getProperty("version");
 	}
 
 	/**
-	 * Converts a string to a <code>Path</code> by checking to see if it is a URI for any of the known providers, or just a plain <code>File</code> path.
+	 * Converts a string to a {@code Path} by checking to see if it is a URI for any of the known providers, or just a plain {@code File} path.
 	 * WARNING! This is not an efficient routine and should NOT be called in performance critical code.
 	 */
 	public static Path MakePath(Object path) {
 		if (path == null)
 			return null;
 		if (path instanceof Path)
-			return (Path)path;
+			return (Path) path;
 		String s = path.toString();
 		if (s.length() == 0)
 			return null;
@@ -85,13 +87,12 @@ public class Utils {
 					retVal = p.getPath(uri);
 					if (retVal != null)
 						return retVal;
-				}
-				catch (URISyntaxException e) {
+				} catch (URISyntaxException e) {
 					// continue on.
 				}
 			}
 		}
-		
+
 		// Didn't match any of the providers, see if it is a regular File path.
 		File f = (new File(s)).getAbsoluteFile();
 		try {
@@ -100,13 +101,12 @@ public class Utils {
 			if (fs == null)
 				return null;
 			retVal = fs.getPath(f.getAbsolutePath());
-		}
-		catch (URISyntaxException e) {
+		} catch (URISyntaxException e) {
 			retVal = null;
 		}
 		return retVal;
 	}
-	
+
 	/**
 	 * Format used for HTTP date headers.
 	 */
@@ -119,30 +119,31 @@ public class Utils {
 
 	/**
 	 * Get a new date formatter compatible with HTTP headers protocol.
-	 * SPECIFICALLY... This means: 
-	 * 	The parser will parse GMT and return local time. 
-	 *	The formatter will take a local time and output a GMT string.
+	 * SPECIFICALLY... This means:
+	 * The parser will parse GMT and return local time.
+	 * The formatter will take a local time and output a GMT string.
 	 */
 	public static DateFormat GetHTTPDateFormater() {
 		SimpleDateFormat f = new SimpleDateFormat(HTTP_DATE_FORMAT);
 		f.setTimeZone(GMT_TZ);
 		return f;
 	}
-	
+
 	/**
 	 * Wrap a few classes of objects into an appropriate HttpEntity.
-	 * @param obj	Currently may be one of:
-	 * 					org.apache.http.HttpEntity
-	 * 					java.lang.String
-	 * 					java.lang.byte[]
-	 * 					java.nio.ByteBuffer
-	 * 					java.io.InputStream
-	 * 					java.io.File
-	 * @param ct	The content type (if any) of 'obj'
+	 *
+	 * @param obj Currently may be one of:
+	 *            org.apache.http.HttpEntity
+	 *            java.lang.String
+	 *            java.lang.byte[]
+	 *            java.nio.ByteBuffer
+	 *            java.io.InputStream
+	 *            java.io.File
+	 * @param ct  The content type (if any) of 'obj'
 	 */
 	public static HttpEntity WrapObjWithHttpEntity(Object obj, ContentType ct) {
 		HttpEntity retVal;
-		
+
 		if (obj instanceof HttpEntity)
 			retVal = (HttpEntity) obj;
 		else if (obj instanceof String)

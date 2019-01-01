@@ -24,33 +24,24 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
-import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
-import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
-import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
-import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.WatchEvent;
-import java.nio.file.WatchKey;
-import java.nio.file.WatchService;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
+import static java.nio.file.StandardWatchEventKinds.*;
+
 /**
- * This class is a GOF Bridge pattern to decouple file watching from the underlying technology used to 'watch' a given directory for changes. 
+ * This class is a GOF Bridge pattern to decouple file watching from the underlying technology used to 'watch' a given directory for changes.
  * Could use something like JNotify, but currently uses JDK 7.
  */
+@SuppressWarnings("WeakerAccess")
 public class DirectoryWatchService {
 
 	/**
@@ -58,8 +49,8 @@ public class DirectoryWatchService {
 	 */
 	public DirectoryWatchService() throws IOException {
 		this.watcher = FileSystems.getDefault().newWatchService();
-		this.keys = new HashMap<WatchKey, Path>();
-		this.listeners = new ConcurrentHashMap<Path, DirectoryWatchEventListener>();
+		this.keys = new HashMap<>();
+		this.listeners = new ConcurrentHashMap<>();
 		Thread t = new Thread("DirectoryWatcher") {
 			public void run() {
 				processEvents();
@@ -68,15 +59,17 @@ public class DirectoryWatchService {
 		t.setDaemon(true);
 		t.start();
 	}
+
 	protected final WatchService watcher;
 	protected final Map<WatchKey, Path> keys;
 	protected final Map<Path, DirectoryWatchEventListener> listeners;
 
 	/**
 	 * Register a watch on the specified directory/file
-	 * 
+	 *
 	 * @return An opaque token needed to cancel this 'watch'
 	 */
+	@SuppressWarnings("UnusedReturnValue")
 	public Object establishWatch(Path watch, DirectoryWatchEventListener listener) throws IOException {
 		Path p = watch.toAbsolutePath();
 		listeners.put(p, listener);
@@ -100,13 +93,14 @@ public class DirectoryWatchService {
 
 	/**
 	 * Cancel a previously established watch
-	 * 
-	 * @param token Value returned from <code>establishWatch</code>
+	 *
+	 * @param token Value returned from {@code establishWatch}
 	 * @return True if the watch existed and was successfully canceled.
 	 */
-	public boolean cancelWatch(Object token) throws IOException {
+	@SuppressWarnings("unused")
+	public boolean cancelWatch(Object token) {
 		if (token instanceof Path) {
-			listeners.remove((Path)token);
+			listeners.remove(token);
 			return true;
 		}
 		else if (token instanceof File) {
@@ -116,7 +110,7 @@ public class DirectoryWatchService {
 		}
 		else if (token instanceof WatchKey) {
 			((WatchKey) token).cancel();
-			listeners.remove(keys.remove(((WatchKey) token)));
+			listeners.remove(keys.remove(token));
 			return true;
 		}
 		return false;
@@ -141,7 +135,7 @@ public class DirectoryWatchService {
 	 * Register the given directory, and all its sub-directories, with this service.
 	 */
 	private WatchKey registerAll(final Path start) throws IOException {
-		final WatchKey[] retVal = { null };
+		final WatchKey[] retVal = {null};
 		// register directory and sub-directories
 		Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
 			@Override
@@ -164,8 +158,7 @@ public class DirectoryWatchService {
 			WatchKey key;
 			try {
 				key = watcher.take(); // wait for key to be signaled
-			}
-			catch (InterruptedException x) {
+			} catch (InterruptedException x) {
 				return;
 			}
 
@@ -174,8 +167,7 @@ public class DirectoryWatchService {
 				continue;
 
 			for (WatchEvent<?> event : key.pollEvents()) {
-				@SuppressWarnings("rawtypes")
-				WatchEvent.Kind kind = event.kind();
+				@SuppressWarnings("rawtypes") WatchEvent.Kind kind = event.kind();
 				if (kind == OVERFLOW) // ? How should OVERFLOW event be handled
 					continue;
 				// Context for directory entry event is the file name of entry
@@ -212,8 +204,7 @@ public class DirectoryWatchService {
 					try {
 						if (Files.isDirectory(child, NOFOLLOW_LINKS))
 							registerAll(child);
-					}
-					catch (IOException x) {
+					} catch (IOException x) {
 						// ignore to keep sample readable
 					}
 				}

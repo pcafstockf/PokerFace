@@ -24,20 +24,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-import java.io.IOException;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.protocol.HttpContext;
 
+import java.io.IOException;
+
 /**
- * Specialization of <code>AbsClientRequestConsumer</code> to consume a client request that will be processed by a JavaScript endpoint.
+ * Specialization of {@code AbsClientRequestConsumer} to consume a client request that will be processed by a JavaScript endpoint.
  */
 public class RequestForScriptConsumer extends AbsClientRequestConsumer {
-	
+
 	/**
-	 * {@inheritDoc}
-	 * Primary constructor simply enforces that the producer passed to our superclass is a <code>ScriptResponseProducer</code>
+	 * Primary constructor simply enforces that the producer passed to our superclass is a {@code ScriptResponseProducer}
 	 */
 	RequestForScriptConsumer(HttpContext context, BufferIOController buffer, ScriptResponseProducer producer) {
 		super(context, buffer, producer);
@@ -45,11 +45,12 @@ public class RequestForScriptConsumer extends AbsClientRequestConsumer {
 
 	/**
 	 * {@inheritDoc}
-	 * Since the <code>RequestHandler</code> already asked the endpoint to evaluate the request, *and* since the scripts don't currently perform async loading of request content, this method does nothing.
+	 * Since the {@code RequestHandler} already asked the endpoint to evaluate the request, *and* since the scripts don't currently perform async loading of request content, this method does nothing.
 	 */
+	@SuppressWarnings("RedundantThrows")
 	@Override
 	public void requestReceived(HttpRequest request) throws HttpException, IOException {
-		String id = (String)context.getAttribute("pokerface.txId");
+		String id = (String) context.getAttribute("pokerface.txId");
 		Logger.info("[client->endpoint] " + id + " " + request.getRequestLine());
 	}
 
