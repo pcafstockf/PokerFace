@@ -56,13 +56,15 @@ public class BufferIOController {
 	 */
 	public void close() {
 		if (borrowedBuffer) {
-			assert writeCompleted;
 			try {
 				buffer.clear();
 				bufferPool.returnObject(buffer);
 				buffer = null;
 				borrowedBuffer = false;
-			} catch (Exception e) {
+				// This assertion can fail in cases of a connection being forced close by the client.
+				// However, most folks don't run with assertions enabled in prod, and I consider the tradeoff acceptable (for now) to ensure that we are cleaning up properly.
+				assert writeCompleted;
+			} catch (Exception | AssertionError e) {
 				Logger.error("Unable to return ByteBuffer to pool", e);
 			}
 		}
@@ -87,12 +89,12 @@ public class BufferIOController {
 				if (buffer == null) {
 					try {
 						buffer = bufferPool.borrowObject();
-						buffer.reset(); // Yes it's redundant with our return code, but it *is* a community pool :-)
 						borrowedBuffer = true;
 					} catch (Exception e) {
 						buffer = ByteBuffer.allocateDirect(1024 * 1024);
 						borrowedBuffer = false;
 					}
+					buffer.clear();
 				}
 			}
 		}
