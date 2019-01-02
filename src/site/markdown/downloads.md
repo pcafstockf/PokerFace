@@ -1,5 +1,5 @@
 ###PokerFace distribution
-Click [here](https://raw.githubusercontent.com/pcafstockf/PokerFace/master/dist/PokerFace-0.9.1.jar) to download the latest PokerFace jar file.
+Click [here](https://raw.githubusercontent.com/pcafstockf/PokerFace/master/dist/PokerFace-0.9.2.jar) to download the latest PokerFace jar file.
 
 ####Sample files
 Sample [configuration file](https://raw.githubusercontent.com/pcafstockf/PokerFace/master/Samples/SampleConfig.xml)  

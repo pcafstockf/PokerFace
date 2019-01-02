@@ -4,19 +4,19 @@
 To get everything setup, let's walk through a simple reverse proxy from your own machine to our good friends over at Stack Overflow.
 
 * You will need to have [Java 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html) or greater installed on your machine.
-* If you don't have it already, [download](./downloads.html) the latest PokerFace-0.9.1.jar file.
+* If you don't have it already, [download](./downloads.html) the latest PokerFace-0.9.2.jar file.
 * Create a local directory structure that looks like this:
 
 ```
 my-test-dir  		(you can name this whatever you want)
- | PokerFace-0.9.1.jar  (the latest version from the download link above)
+ | PokerFace-0.9.2.jar  (the latest version from the download link above)
 ```
 
 * Open a command prompt and type `java -version` to ensure you are running Java 8 or greater.
 * Change into 'my-test-dir' and launch PokerFace with the command:
 
 ```
-java -jar PokerFace-0.9.1.jar -listen 127.0.0.1:8080 -target "/*=http://stackoverflow.com"
+java -jar PokerFace-0.9.2.jar -listen 127.0.0.1:8080 -target "/*=http://stackoverflow.com"
 ```
 
 This tells PokerFace to listen for http connections on localhost port 8080 and to forward all requests over to Stack Overflow.  You can test this by browsing to [http://localhost:8080/](http://localhost:8080/).  Note that it is the Stack Overflow website, but the url is your own machine.  This is a reverse proxy in it's simplest form.
@@ -25,7 +25,7 @@ This tells PokerFace to listen for http connections on localhost port 8080 and t
 Let's look at a slightly more realistic reverse proxy configuration that will also illustrates the infamous **DocumentRoot** challenge (which you must be aware of when configuring any reverse proxy):
 
 ```
-java -jar PokerFace-0.9.1.jar -listen http=0.0.0.0:8080 -target "/public/*=http://new-hotness.mydomain.com" -target "/private/*=http://old-and-busted.mydomain.com/corp#8"
+java -jar PokerFace-0.9.2.jar -listen http=0.0.0.0:8080 -target "/public/*=http://new-hotness.mydomain.com" -target "/private/*=http://old-and-busted.mydomain.com/corp#8"
 ```
 
 This would tell PokerFace to listen for http connections to port 8080 on all interfaces. 

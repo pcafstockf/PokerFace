@@ -22,12 +22,12 @@ my-test-dir  		(you can name this whatever you want)
  | my-static-files	(whatever name you want)
    | foo.html		(just some valid html file)
  | serverkeys.jks	(whatever name you want)
- | PokerFace-0.9.1.jar  (the latest version from the download link above)
+ | PokerFace-0.9.2.jar  (the latest version from the download link above)
 ```
 * Change into 'my-test-dir' and launch PokerFace with the command:
 
 ```
-java -jar PokerFace-0.9.1.jar -keystore "serverkeys.jks" -storepass "changeit" -keypass "changeit" -listen "selfserve,ssl=0.0.0.0:8080" -files "my-static-files"
+java -jar PokerFace-0.9.2.jar -keystore "serverkeys.jks" -storepass "changeit" -keypass "changeit" -listen "selfserve,ssl=0.0.0.0:8080" -files "my-static-files"
 ```
 
 * Browse to https://localhost:8080/foo.html .  

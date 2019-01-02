@@ -42,14 +42,12 @@ import java.net.URL;
  */
 public class ConfigValidationTest {
 
-	@SuppressWarnings("RedundantThrows")
 	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
+	public static void setUpBeforeClass() {
 	}
 
-	@SuppressWarnings("RedundantThrows")
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 	}
 
 	@Test
@@ -82,13 +80,11 @@ public class ConfigValidationTest {
 		validator.validate(new StreamSource(config));
 	}
 
-	@SuppressWarnings("RedundantThrows")
 	@After
-	public void tearDown() throws Exception {
+	public void tearDown() {
 	}
 
-	@SuppressWarnings("RedundantThrows")
 	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
+	public static void tearDownAfterClass() {
 	}
 }

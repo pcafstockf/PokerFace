@@ -51,9 +51,8 @@ public class NashornCompiledScriptTest {
 	private static ScriptEngine engine;
 	private static CompiledScript compiledScript;
 
-	@SuppressWarnings("RedundantThrows")
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 	}
 
 	@Test
@@ -131,14 +130,12 @@ public class NashornCompiledScriptTest {
 		executor.shutdownNow();
 	}
 
-	@SuppressWarnings("RedundantThrows")
 	@After
-	public void tearDown() throws Exception {
+	public void tearDown() {
 	}
 
-	@SuppressWarnings("RedundantThrows")
 	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
+	public static void tearDownAfterClass() {
 		compiledScript = null;
 		engine = null;
 		engineFactory = null;

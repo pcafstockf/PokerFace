@@ -63,9 +63,8 @@ public class HelloWorldScriptTest {
 	private static SSLSocketFactory PrevSocketFactory;
 	private static HostnameVerifier PrevHostnameVerifier;
 
-	@SuppressWarnings("RedundantThrows")
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 	}
 
 	@Test
@@ -90,9 +89,8 @@ public class HelloWorldScriptTest {
 		}
 	}
 
-	@SuppressWarnings("RedundantThrows")
 	@After
-	public void tearDown() throws Exception {
+	public void tearDown() {
 	}
 
 	@AfterClass

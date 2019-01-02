@@ -83,9 +83,8 @@ public class ProxySpecificTest {
 		}
 	}
 
-	@SuppressWarnings("RedundantThrows")
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 	}
 
 	/**
@@ -110,9 +109,8 @@ public class ProxySpecificTest {
 		in.close();
 	}
 
-	@SuppressWarnings("RedundantThrows")
 	@After
-	public void tearDown() throws Exception {
+	public void tearDown() {
 	}
 
 	/**

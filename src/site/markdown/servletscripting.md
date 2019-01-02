@@ -39,21 +39,21 @@ The `generateResponse` method must return an object describing the response to b
 
 ###Testing the 'Hi' script
 * You will need to have [Java 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html) or greater installed on your machine.
-* If you don't have it already, [download](./downloads.html) the latest PokerFace-0.9.1.jar file.
+* If you don't have it already, [download](./downloads.html) the latest PokerFace-0.9.2.jar file.
 * Create a local directory structure that looks like this:
 
 ```
 my-test-dir  		(you can name this whatever you want)
  | my-script-root	(whatever name you want)
    | hi.html.js		(the contents of the above 'hi' script)
- | PokerFace-0.9.1.jar  (the latest version from the download link above)
+ | PokerFace-0.9.2.jar  (the latest version from the download link above)
 ```
 
 * Open a command prompt and type `java -version` to ensure you are running Java 8 or greater.
 * Change into 'my-test-dir' and launch PokerFace with the command:
 
 ```
-java -jar PokerFace-0.9.1.jar -listen 127.0.0.1:8080 -scripts "my-script-root"
+java -jar PokerFace-0.9.2.jar -listen 127.0.0.1:8080 -scripts "my-script-root"
 ```
 
 * Browse to [http://localhost:8080/hi.html](http://localhost:8080/hi.html) to get an appropriate greeting :-)
@@ -197,13 +197,13 @@ my-test-dir\
  | my-script-libs
    | moment-with-locals-2.9.0.js
  | my-test-config.xml
- | PokerFace-0.9.1.jar  (download the latest version from the link above)
+ | PokerFace-0.9.2.jar  (download the latest version from the link above)
 ```
 
 * Bring up a command prompt, change into 'my-test-dir' and launch **PokerFace** with the command:
 
 ```
-java -jar PokerFace-0.9.1.jar -config "my-test-config.xml"
+java -jar PokerFace-0.9.2.jar -config "my-test-config.xml"
 ```
 
 * Browse to [http://localhost:8080/helloworld.html](http://localhost:8080/helloworld.html) to recieve an appropriate greeting :-)
