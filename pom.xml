@@ -3,7 +3,7 @@
 
 	<groupId>com.bytelightning.opensource.pokerface</groupId>
 	<artifactId>PokerFace</artifactId>
-	<version>0.9.2</version>
+	<version>0.9.3</version>
 	<packaging>jar</packaging>
 
 	<name>PokerFace</name>
@@ -44,18 +44,9 @@
 
 	<repositories>
 		<repository>
-			<id>central</id>
-			<name>Central Repository</name>
-			<url>http://repo.maven.apache.org/maven2</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		<repository>
 			<id>central1</id>
-			<name>Maven Repository Switchboard</name>
-			<layout>default</layout>
-			<url>http://repo1.maven.org/maven2</url>
+			<name>Central Repository</name>
+			<url>https://repo1.maven.org/maven2/</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
@@ -65,26 +56,7 @@
 		<pluginRepository>
 			<id>central</id>
 			<name>Central Repository</name>
-			<url>http://repo.maven.apache.org/maven2</url>
-			<layout>default</layout>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</pluginRepository>
-		<pluginRepository>
-			<id>central2</id>
-			<name>Maven Plugin Central Repository</name>
-			<url>http://central.maven.org/maven2/</url>
-			<layout>default</layout>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</pluginRepository>
-		<pluginRepository>
-			<id>central1</id>
-			<name>Maven Plugin Repository</name>
-			<url>http://repo1.maven.org/maven2</url>
-			<layout>default</layout>
+			<url>https://repo1.maven.org/maven2/</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
@@ -95,7 +67,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-jdk14</artifactId>
-			<version>1.7.25</version>
+			<version>1.7.30</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-configuration</groupId>
@@ -115,7 +87,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-pool2</artifactId>
-			<version>2.6.0</version>
+			<version>2.8.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
@@ -135,7 +107,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
+			<version>4.13</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
