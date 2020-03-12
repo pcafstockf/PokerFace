@@ -1,6 +1,4 @@
-The MIT License (MIT)
-
-PokerFace: Asynchronous, streaming, HTTP/1.1, scriptable, reverse proxy.
+MIT License
 
 Copyright (c) 2015 Frank Stock
 
@@ -21,7 +19,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
 
 NOTICE:
 This product includes software developed by other parties.
