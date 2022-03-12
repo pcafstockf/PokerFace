@@ -58,14 +58,14 @@
 <ul>
 
 <li>You will need to have <a class="externalLink" href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Java 8</a> or greater installed on your machine.</li>
-<li>If you don&#x2019;t have it already, <a href="./downloads.html">download</a> the latest PokerFace-0.9.2.jar file.</li>
+<li>If you don&#x2019;t have it already, <a href="./downloads.html">download</a> the latest PokerFace-0.9.4.jar file.</li>
 <li>Create a local directory structure that looks like this:</li>
 </ul>
 
 <div>
 <div>
 <pre class="source">my-test-dir  		(you can name this whatever you want)
- | PokerFace-0.9.2.jar  (the latest version from the download link above)
+ | PokerFace-0.9.4.jar  (the latest version from the download link above)
 </pre></div></div>
 
 <ul>
@@ -76,7 +76,7 @@
 
 <div>
 <div>
-<pre class="source">java -jar PokerFace-0.9.2.jar -listen 127.0.0.1:8080 -target &quot;/*=http://stackoverflow.com&quot;
+<pre class="source">java -jar PokerFace-0.9.4.jar -listen 127.0.0.1:8080 -target &quot;/*=http://stackoverflow.com&quot;
 </pre></div></div>
 
 <p>This tells PokerFace to listen for http connections on localhost port 8080 and to forward all requests over to Stack Overflow.  You can test this by browsing to <a class="externalLink" href="http://localhost:8080/">http://localhost:8080/</a>.  Note that it is the Stack Overflow website, but the url is your own machine.  This is a reverse proxy in it&#x2019;s simplest form.</p></div>
@@ -86,7 +86,7 @@
 
 <div>
 <div>
-<pre class="source">java -jar PokerFace-0.9.2.jar -listen http=0.0.0.0:8080 -target &quot;/public/*=http://new-hotness.mydomain.com&quot; -target &quot;/private/*=http://old-and-busted.mydomain.com/corp#8&quot;
+<pre class="source">java -jar PokerFace-0.9.4.jar -listen http=0.0.0.0:8080 -target &quot;/public/*=http://new-hotness.mydomain.com&quot; -target &quot;/private/*=http://old-and-busted.mydomain.com/corp#8&quot;
 </pre></div></div>
 
 <p>This would tell PokerFace to listen for http connections to port 8080 on all interfaces. Requests beginning with <tt>/public/</tt> will be proxied to the server at <tt>new-hotness.mydomain.com</tt>. Requests beginning with <tt>/private/</tt> will be sent to the <tt>old-and-busted.mydomain.com</tt> server. All other requests will return a <tt>404</tt> (NOT_FOUND).</p>
@@ -116,7 +116,7 @@
     <footer>
       <div class="container-fluid">
         <div class="row-fluid">
-            <p class="pull-right">Copyright &copy;2015&#x2013;2019
+            <p class="pull-right">Copyright &copy;2015&#x2013;2022
 Frank Stock.
 All rights reserved.</p>
         </div>
