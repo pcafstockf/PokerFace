@@ -2,21 +2,21 @@ PokerFace can serve static files from a local directory just like any other web-
 
 ###Setup
 * You will need to have [Java 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html) or greater installed on your machine.
-* If you don't have it already, [download](./downloads.html) the latest PokerFace-0.9.2.jar file.
+* If you don't have it already, [download](./downloads.html) the latest PokerFace-0.9.4.jar file.
 * Create a local directory structure that looks like this:
 
 ```
 my-test-dir  		(you can name this whatever you want)
  | my-static-files	(whatever name you want)
    | foo.html		(just some valid html file)
- | PokerFace-0.9.2.jar  (the latest version from the download link above)
+ | PokerFace-0.9.4.jar  (the latest version from the download link above)
 ```
 
 * Open a command prompt and type `java -version` to ensure you are running Java 8 or greater.
 * Change into 'my-test-dir' and launch PokerFace with the command:
 
 ```
-java -jar PokerFace-0.9.2.jar -listen 127.0.0.1:8080 -files "my-static-files"
+java -jar PokerFace-0.9.4.jar -listen 127.0.0.1:8080 -files "my-static-files"
 ```
 
 * Browse to http://localhost:8080/foo.html

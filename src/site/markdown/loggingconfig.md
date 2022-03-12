@@ -4,7 +4,7 @@ By default **PokerFace** uses the standard java.util.logging framework built int
 Thanks to [SLF4J](http://www.slf4j.org), it is possible to configure PokerFace to use other logging frameworks.  This is done by specifying a logging framework and its SLF4J implementation module on the classpath ahead of the PokerFace jar.  For example to use log4j, you could launch PokerFace with:
 
 ```
-java -Dlog4j.configuration="path/to/log4j.properties" -classpath "path/to/log4j.jar:path/to/slf4j-log4j12.jar:path/to/PokerFace-0.9.2.jar" com.bytelightning.opensource.pokerface.PokerFaceApp -config "path/to/pokerface-config.xml"
+java -Dlog4j.configuration="path/to/log4j.properties" -classpath "path/to/log4j.jar:path/to/slf4j-log4j12.jar:path/to/PokerFace-0.9.4.jar" com.bytelightning.opensource.pokerface.PokerFaceApp -config "path/to/pokerface-config.xml"
 
 NOTE: On Windows you will need to change the class path separator character above from ':' to ';'.
 ```
